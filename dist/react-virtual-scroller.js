@@ -68,8 +68,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var assign = __webpack_require__(2);
 	var DragHelper = __webpack_require__(3);
 	var normalize = __webpack_require__(7);
-	var hasTouch = __webpack_require__(5);
-	var raf = __webpack_require__(4);
+	var hasTouch = __webpack_require__(4);
+	var raf = __webpack_require__(5);
 
 	var preventDefault = function preventDefault(event) {
 		return event.preventDefault();
@@ -78,6 +78,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		return x < 0 ? -1 : 1;
 	};
 	var emptyFn = function emptyFn() {};
+	var ABS = Math.abs;
 
 	var LoadMaskFactory = React.createFactory(LoadMask);
 
@@ -93,6 +94,43 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var PT = React.PropTypes;
 	var DISPLAY_NAME = 'Scroller';
+
+	var syncScrollbar = function syncScrollbar(orientation) {
+
+		var refNames = {
+			vertical: 'verticalScrollbar',
+			horizontal: 'horizontalScrollbar'
+		};
+		return function (scrollPos, event) {
+			var domNode = React.findDOMNode(this.refs[refNames[orientation]]);
+			var scrollPosName = orientation == 'horizontal' ? 'scrollLeft' : 'scrollTop';
+
+			domNode[scrollPosName] = scrollPos;
+
+			var newScrollPos = domNode[scrollPosName];
+
+			if (newScrollPos != scrollPos) {} else {
+				event && preventDefault(event);
+			}
+		};
+	};
+
+	var syncHorizontalScrollbar = syncScrollbar('horizontal');
+	var syncVerticalScrollbar = syncScrollbar('vertical');
+
+	var scrollAt = function scrollAt(orientation) {
+		var syncFn = orientation == 'horizontal' ? syncHorizontalScrollbar : syncVerticalScrollbar;
+
+		return function (scrollPos, event) {
+			this.mouseWheelScroll = true;
+
+			syncFn.call(this, Math.round(scrollPos), event);
+
+			raf((function () {
+				this.mouseWheelScroll = false;
+			}).bind(this));
+		};
+	};
 
 	/**
 	 * The scroller can have a load mask (loadMask prop is true by default),
@@ -117,12 +155,17 @@ return /******/ (function(modules) { // webpackBootstrap
 		propTypes: {
 			loadMask: PT.oneOfType([PT.bool, PT.func]),
 			loading: PT.bool,
+			normalizeStyles: PT.bool,
 
 			scrollTop: PT.number,
+			scrollLeft: PT.number,
+
 			scrollWidth: PT.number.isRequired,
 			scrollHeight: PT.number.isRequired,
 
 			height: PT.number,
+			width: PT.number,
+
 			virtualRendering: PT.oneOf([true])
 		},
 
@@ -135,7 +178,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				scrollbarSize: 20,
 
 				scrollStep: 10,
-				scrollTop: 0
+				scrollTop: 0,
+				scrollLeft: 0
 			};
 		},
 
@@ -171,71 +215,33 @@ return /******/ (function(modules) { // webpackBootstrap
 		handleTouchStart: function handleTouchStart(event) {
 
 			var props = this.props;
-			// var table = this.refs.table.getDOMNode()
-
 			var scroll = {
 				top: props.scrollTop,
 				left: props.scrollLeft
 			};
 
-			// var protectScrollConfig = this.getProtectScrollConfig()
-
 			var newScrollPos;
-
 			var side;
 
 			DragHelper(event, {
 				scope: this,
-				onDrag: buffer(function (event, config) {
-
-					var diffTop = config.diff.top;
-					var diffLeft = config.diff.top;
-
-					var diff;
-
-					if (diffTop == 0 && diffLeft == 0) {
+				onDrag: function onDrag(event, config) {
+					if (config.diff.top == 0 && config.diff.left == 0) {
 						return;
 					}
 
 					if (!side) {
-						side = Math.abs(config.diff.top) > Math.abs(config.diff.left) ? 'top' : 'left';
+						side = ABS(config.diff.top) > ABS(config.diff.left) ? 'top' : 'left';
 					}
 
-					diff = config.diff[side];
+					var diff = config.diff[side];
 
 					newScrollPos = scroll[side] - diff;
 
-					// if (side == 'top'){
-					//     newScrollPos = this.protectScrollTop(newScrollPos, protectScrollConfig)
-					// } else {
-					//     newScrollPos = this.protectScrollLeft(newScrollPos, protectScrollConfig)
-					// }
-
-					if (props.virtualRendering && side == 'top') {
+					if (side == 'top') {
 						this.verticalScrollAt(newScrollPos, event);
-						return;
-					}
-
-					if (side == 'left') {
-						this.horizontalScrollAt(newScrollPos);
-						return;
-					}
-				}, -1),
-
-				onDrop: function onDrop(event) {
-
-					if (!side) {
-						return;
-					}
-
-					if (side == 'left') {
-						return;
-					}
-
-					if (!props.virtualRendering) {
-						props.onScrollTop(newScrollPos);
 					} else {
-						this.verticalScrollAt(newScrollPos, event);
+						this.horizontalScrollAt(newScrollPos, event);
 					}
 				}
 			});
@@ -246,41 +252,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		handleWheel: function handleWheel(event) {
 
+			var props = this.props;
 			var delta = event.deltaY;
 
-			if (delta && Math.abs(delta) < 40) {
+			var scrollTop = props.scrollTop;
+			var scrollLeft = props.scrollLeft;
+
+			if (delta && ABS(delta) < 40) {
 				delta = signum(delta) * 40;
 			}
 
 			if (event.shiftKey) {
+
 				//HORIZONTAL SCROLL
 				if (!delta) {
 					delta = event.deltaX;
 				}
 
-				var horizScrollbar = this.refs.horizScrollbar;
-				var domNode = React.findDOMNode(horizScrollbar);
-				var pos = domNode.scrollLeft;
-
-				if (delta < 0 && pos == 0) {
-					//no need to prevent default
-					//we allow the event to continue so the browser
-					//scrolls parent dom elements if needed
-					return;
-				}
-
-				domNode.scrollLeft = pos + delta;
-
-				preventDefault(event);
-
+				this.horizontalScrollAt(scrollLeft + delta);
 				return;
 			}
 
 			//VERTICAL SCROLL
 			var deltaY = delta;
-			var props = this.props;
 			var virtual = props.virtualRendering;
-			var scrollTop = props.scrollTop;
 			var scrollStep = props.scrollStep;
 
 			if (virtual && deltaY < 0 && -deltaY < scrollStep) {
@@ -299,59 +294,32 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.verticalScrollAt(scrollTop, event);
 		},
 
-		horizontalScrollAt: function horizontalScrollAt(scrollLeft) {
-			;(this.props.onScrollLeft || emptyFn)(scrollLeft);
-		},
-
 		handleHorizontalScroll: function handleHorizontalScroll(event) {
-			this.horizontalScrollAt(event.target.scrollLeft);
-		},
-
-		verticalScrollAt: function verticalScrollAt(scrollTop, event) {
-			this.mouseWheelScroll = true;
-			this.syncVerticalScrollbar(Math.round(scrollTop), event);
-			raf((function () {
-				this.mouseWheelScroll = false;
-			}).bind(this));
-		},
-
-		syncVerticalScrollbar: function syncVerticalScrollbar(scrollTop, event) {
-
-			if (scrollTop === undefined) {
-				scrollTop = this.props.scrollTop + (this.props.topOffset || 0);
-			}
-
-			this.lockVerticalScroll = true;
-
-			var domNode = this.refs.verticalScrollbar.getDOMNode();
-
-			domNode.scrollTop = scrollTop;
-
-			var newScrollTop = domNode.scrollTop;
-
-			if (newScrollTop != scrollTop) {
-				//overflowing either to top, or to bottom
-				this.props.onScrollOverflow && this.props.onScrollOverflow(signum(scrollTop), newScrollTop);
-			} else {
-				preventDefault(event);
-			}
+			var target = event.target;
+			var scrollLeft = target.scrollLeft;(this.props.onHorizontalScroll || emptyFn)(scrollLeft);
 		},
 
 		handleVerticalScroll: function handleVerticalScroll(event) {
 
 			var target = event.target;
-			var scrollTop = target.scrollTop;
+			var scrollTop = target.scrollTop
 
-			if (!this.mouseWheelScroll && this.props.onScrollOverflow) {
-				if (scrollTop == 0) {
-					this.props.onScrollOverflow(-1, scrollTop);
-				} else if (scrollTop + target.clientHeight >= target.scrollHeight) {
-					this.props.onScrollOverflow(1, scrollTop);
-				}
-			}
+			// if (!this.mouseWheelScroll && this.props.onScrollOverflow){
+			//     if (scrollTop == 0){
+			//         this.props.onScrollOverflow(-1, scrollTop)
+			//     } else if (scrollTop + target.clientHeight >= target.scrollHeight){
+			//         this.props.onScrollOverflow(1, scrollTop)
+			//     }
+			// }
 
 			;(this.props.onVerticalScroll || emptyFn)(scrollTop);
 		},
+
+		verticalScrollAt: scrollAt('vertical'),
+		horizontalScrollAt: scrollAt('horizontal'),
+
+		syncHorizontalScrollbar: syncHorizontalScrollbar,
+		syncVerticalScrollbar: syncVerticalScrollbar,
 
 		////////////////////////////////////////////////
 		//
@@ -400,7 +368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					React.createElement(
 						'div',
 						{
-							ref: 'horizScrollbar',
+							ref: 'horizontalScrollbar',
 							onScroll: onScroll,
 							className: 'z-horizontal-scrollbar-fix'
 						},
@@ -413,7 +381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					{
 						style: style,
 						className: 'z-horizontal-scrollbar',
-						ref: 'horizScrollbar',
+						ref: 'horizontalScrollbar',
 						onScroll: onScroll
 					},
 					scroller
@@ -463,6 +431,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				style.height = props.height;
 			}
 
+			if (props.width != null) {
+				style.width = props.width;
+			}
+
 			if (props.normalizeStyles) {
 				style = normalize(style);
 			}
@@ -485,6 +457,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports['default'] = Scroller;
 	module.exports = exports['default'];
+
+	//overflowing either to left, or to right
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -533,7 +507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var assign = __webpack_require__(2)
 	var Region = __webpack_require__(14)
-	var hasTouch = __webpack_require__(5)
+	var hasTouch = __webpack_require__(4)
 	var once   = __webpack_require__(8)
 
 	var Helper = function(config){
@@ -730,6 +704,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = 'ontouchstart' in global || (global.DocumentTouch && document instanceof DocumentTouch)
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var now = __webpack_require__(15)
 	  , global = typeof window === 'undefined' ? {} : window
 	  , vendors = ['moz', 'webkit']
@@ -811,13 +792,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  caf.apply(global, arguments)
 	}
 
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = 'ontouchstart' in global || (global.DocumentTouch && document instanceof DocumentTouch)
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 6 */
@@ -1125,7 +1099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(25)
+	var Region = __webpack_require__(22)
 
 	__webpack_require__(19)
 	__webpack_require__(20)
@@ -1354,9 +1328,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(22)
-	var getPrefix    = __webpack_require__(23)
-	var el           = __webpack_require__(24)
+	var toUpperFirst = __webpack_require__(23)
+	var getPrefix    = __webpack_require__(24)
+	var el           = __webpack_require__(25)
 
 	var MEMORY = {}
 	var STYLE
@@ -1451,9 +1425,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var getPrefix     = __webpack_require__(23)
+	var getPrefix     = __webpack_require__(24)
 	var forcePrefixed = __webpack_require__(26)
-	var el            = __webpack_require__(24)
+	var el            = __webpack_require__(25)
 
 	var MEMORY = {}
 	var STYLE
@@ -1505,7 +1479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var Region = __webpack_require__(25)
+	var Region = __webpack_require__(22)
 
 	/**
 	 * @static
@@ -1626,7 +1600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(25)
+	var Region = __webpack_require__(22)
 
 	/**
 	 *
@@ -1670,7 +1644,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var ALIGN_TO_NORMALIZED = __webpack_require__(28)
 
-	var Region = __webpack_require__(25)
+	var Region = __webpack_require__(22)
 
 	/**
 	 * @localdoc Given source and target regions, and the given alignments required, returns a region that is the resulting allignment.
@@ -1747,6 +1721,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = __webpack_require__(29)
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	module.exports = function(str){
@@ -1756,15 +1736,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(22)
+	var toUpperFirst = __webpack_require__(23)
 	var prefixes     = ["ms", "Moz", "Webkit", "O"]
 
-	var el = __webpack_require__(24)
+	var el = __webpack_require__(25)
 
 	var ELEMENT
 	var PREFIX
@@ -1795,7 +1775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -1817,19 +1797,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(29)
-
-/***/ },
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(22)
-	var getPrefix    = __webpack_require__(23)
+	var toUpperFirst = __webpack_require__(23)
+	var getPrefix    = __webpack_require__(24)
 	var properties   = __webpack_require__(17)
 
 	/**
@@ -1921,7 +1895,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var Region = __webpack_require__(25)
+	var Region = __webpack_require__(22)
 
 	/**
 	 *

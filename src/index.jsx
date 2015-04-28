@@ -28,6 +28,47 @@ if (global && global.navigator && global.navigator.appVersion && global.navigato
 const PT = React.PropTypes
 const DISPLAY_NAME = 'Scroller'
 
+const syncScrollbar = function(orientation) {
+
+	var refNames = {
+		vertical  : 'verticalScrollbar',
+		horizontal: 'horizontalScrollbar'
+	}
+	return function(scrollPos, event){
+		var domNode       = React.findDOMNode(this.refs[refNames[orientation]])
+		var scrollPosName = orientation == 'horizontal'? 'scrollLeft': 'scrollTop'
+
+		domNode[scrollPosName] = scrollPos
+
+		var newScrollPos = domNode[scrollPosName]
+
+		if (newScrollPos != scrollPos){
+		    //overflowing either to left, or to right
+		} else {
+		    event && preventDefault(event)
+		}
+	}
+}
+
+const syncHorizontalScrollbar = syncScrollbar('horizontal')
+const syncVerticalScrollbar   = syncScrollbar('vertical')
+
+const scrollAt = function(orientation){
+	var syncFn = orientation == 'horizontal'?
+					syncHorizontalScrollbar:
+					syncVerticalScrollbar
+
+	return function(scrollPos, event){
+	    this.mouseWheelScroll = true
+
+	    syncFn.call(this, Math.round(scrollPos), event)
+
+	    raf(function(){
+	        this.mouseWheelScroll = false
+	    }.bind(this))
+	}
+}
+
 /**
  * The scroller can have a load mask (loadMask prop is true by default),
  * you just need to specify loading=true to see it in action
@@ -54,12 +95,17 @@ const Scroller = React.createClass({
 			PT.func
 		]),
 		loading : PT.bool,
+		normalizeStyles: PT.bool,
 
-		scrollTop: PT.number,
+		scrollTop : PT.number,
+		scrollLeft: PT.number,
+
 		scrollWidth : PT.number.isRequired,
 		scrollHeight: PT.number.isRequired,
 
 		height: PT.number,
+		width : PT.number,
+
 		virtualRendering: PT.oneOf([true])
 	},
 
@@ -94,7 +140,6 @@ const Scroller = React.createClass({
 
 		return <div {...props}>
 			{loadMask}
-
 			<div className="z-content-wrapper" {...events}>
 				{props.children}
 				{verticalScrollbar}
@@ -128,7 +173,7 @@ const Scroller = React.createClass({
 
 	            var diff = config.diff[side]
 
-	            newScrollPos = Math.round(scroll[side] - diff)
+	            newScrollPos = scroll[side] - diff
 
 	            if (side == 'top'){
 	                this.verticalScrollAt(newScrollPos, event)
@@ -145,44 +190,30 @@ const Scroller = React.createClass({
 
 	handleWheel: function(event){
 
-	    var delta = event.deltaY
+		var props      = this.props
+		var delta      = event.deltaY
+
+		var scrollTop  = props.scrollTop
+		var scrollLeft = props.scrollLeft
 
 	    if (delta && ABS(delta) < 40){
 	        delta = signum(delta) * 40
 	    }
 
 	    if (event.shiftKey){
+
 	    	//HORIZONTAL SCROLL
 	        if (!delta){
 	            delta = event.deltaX
 	        }
 
-	        this.horizontalScrollAt(this.props.scrollLeft + delta)
+	        this.horizontalScrollAt(scrollLeft + delta)
 	        return
-
-			// var horizScrollbar = this.refs.horizScrollbar
-			// var domNode        = React.findDOMNode(horizScrollbar)
-			// var pos            = domNode.scrollLeft
-
-	        // if (delta < 0 && pos == 0){
-	        //     //no need to prevent default
-	        //     //we allow the event to continue so the browser
-	        //     //scrolls parent dom elements if needed
-	        //     return
-	        // }
-
-	        // domNode.scrollLeft = pos + delta
-
-	        // preventDefault(event)
-
-	        // return
 	    }
 
 	    //VERTICAL SCROLL
 		var deltaY     = delta
-		var props      = this.props
 		var virtual    = props.virtualRendering
-		var scrollTop  = props.scrollTop
 		var scrollStep = props.scrollStep
 
 	    if (virtual && deltaY < 0 && -deltaY < scrollStep){
@@ -199,14 +230,6 @@ const Scroller = React.createClass({
 	    scrollTop += deltaY
 
 	    this.verticalScrollAt(scrollTop, event)
-	},
-
-	horizontalScrollAt: function(scrollLeft, event) {
-		this.mouseWheelScroll = true
-		this.syncHorizontalScrollbar(Math.round(scrollLeft), event)
-		raf(function(){
-		    this.mouseWheelScroll = false
-		}.bind(this))
 	},
 
 	handleHorizontalScroll: function(event){
@@ -232,42 +255,11 @@ const Scroller = React.createClass({
 	    ;(this.props.onVerticalScroll || emptyFn)(scrollTop)
 	},
 
-	verticalScrollAt: function(scrollTop, event){
-	    this.mouseWheelScroll = true
-	    this.syncVerticalScrollbar(Math.round(scrollTop), event)
-	    raf(function(){
-	        this.mouseWheelScroll = false
-	    }.bind(this))
-	},
+	verticalScrollAt  : scrollAt('vertical'),
+	horizontalScrollAt: scrollAt('horizontal'),
 
-	syncVerticalScrollbar: function(scrollTop, event){
-	    var domNode = React.findDOMNode(this.refs.verticalScrollbar)
-
-	    domNode.scrollTop = scrollTop
-
-	    var newScrollTop = domNode.scrollTop
-
-	    if (newScrollTop != scrollTop){
-	        //overflowing either to top, or to bottom
-	        // this.props.onScrollOverflow && this.props.onScrollOverflow(signum(scrollTop), newScrollTop)
-	    } else {
-	        event && preventDefault(event)
-	    }
-	},
-
-	syncHorizontalScrollbar: function(scrollLeft, event) {
-		var domNode = React.findDOMNode(this.refs.horizontalScrollbar)
-
-		domNode.scrollLeft = scrollLeft
-
-		var newScrollLeft = domNode.scrollLeft
-
-		if (newScrollLeft != scrollLeft){
-		    //overflowing either to left, or to right
-		} else {
-		    event && preventDefault(event)
-		}
-	},
+	syncHorizontalScrollbar: syncHorizontalScrollbar,
+	syncVerticalScrollbar  : syncVerticalScrollbar,
 
 	////////////////////////////////////////////////
 	//
@@ -369,6 +361,10 @@ const Scroller = React.createClass({
 
 		if (props.height != null){
 			style.height = props.height
+		}
+
+		if (props.width != null){
+			style.width = props.width
 		}
 
 		if (props.normalizeStyles){
