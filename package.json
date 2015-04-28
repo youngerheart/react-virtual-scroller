@@ -1,0 +1,59 @@
+{
+  "name": "react-virtual-scroller",
+  "version": "0.1.0",
+  "description": "A virtual scroller container for React",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "make",
+    "dev": "webpack-dev-server --progress --colors --port 9090",
+    "build-style": "webpack --progress --colors --config build-style.config.js",
+    "build": "npm run dist && npm run dist.min && npm run lib && npm run build-style",
+    "dist": "webpack  --progress --colors --config dist.config.js",
+    "wdist": "webpack --watch --progress --colors --config dist.config.js",
+    "dist.min": "webpack  --progress --colors --optimize-minimize --optimize-occurence-order --optimize-dedupe --config dist.min.config.js",
+    "lib": "gulp",
+    "wlib": "gulp watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zippyui/react-virtual-scroller.git"
+  },
+  "keywords": [
+    "react",
+    "react-component",
+    "scroller",
+    "scroll",
+    "container",
+    "virtual",
+    "scrolling"
+  ],
+  "author": "ZippyUI <contact@zippyui.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zippyui/react-virtual-scroller/issues"
+  },
+  "homepage": "https://github.com/zippyui/react-virtual-scroller",
+  "devDependencies": {
+    "babel": "^5.1.13",
+    "babel-core": "^5.1.13",
+    "babel-loader": "^5.0.0",
+    "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
+    "webpack": "^1.8.10",
+    "webpack-dev-server": "^1.8.2",
+    "style-loader": "^0.12.1",
+    "css-loader": "^0.12.0",
+    "stylus-loader": "^1.1.0"
+  },
+  "dependencies": {
+    "has-touch": "^1.0.1",
+    "object-assign": "^2.0.0",
+    "raf": "^2.0.4",
+    "react-load-mask": "^1.0.1",
+    "react-style-normalizer": "^1.2.7",
+    "stylus-normalizer": "^1.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=0.13.0"
+  }
+}
