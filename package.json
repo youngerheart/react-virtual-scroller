@@ -47,12 +47,12 @@
     "extract-text-webpack-plugin": "^0.7.0"
   },
   "dependencies": {
-    "has-touch": "^1.0.1",
     "drag-helper": "^1.2.3",
+    "has-touch": "^1.0.1",
     "object-assign": "^2.0.0",
     "react-load-mask": "^1.0.1",
     "react-style-normalizer": "^1.2.7",
-    "stylus-normalizer": "^1.0.0"
+    "stylus-normalizer": "^1.0.1"
   },
   "peerDependencies": {
     "react": ">=0.13.0"
