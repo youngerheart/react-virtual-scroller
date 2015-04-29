@@ -6,8 +6,6 @@ const assign     = require('object-assign')
 const DragHelper = require('drag-helper')
 const normalize  = require('react-style-normalizer')
 const hasTouch   = require('has-touch')
-const raf        = require('raf')
-// var normalizeWheel = require('./normalizeWheel')
 
 const preventDefault = event => event && event.preventDefault()
 const signum         = x     => x < 0? -1: 1
@@ -31,12 +29,12 @@ const DISPLAY_NAME = 'Scroller'
 
 const ON_OVERFLOW_NAMES = {
 	vertical  : 'onVerticalScrollOverflow',
-	horizontal: 'onHorizontalScrollOverflow',
+	horizontal: 'onHorizontalScrollOverflow'
 }
 
 const ON_SCROLL_NAMES = {
 	vertical  : 'onVerticalScroll',
-	horizontal: 'onHorizontalScroll',
+	horizontal: 'onHorizontalScroll'
 }
 
 /**
@@ -163,7 +161,10 @@ const Scroller = React.createClass({
 		minHorizontalScrollStep: PT.number,
 		minVerticalScrollStep  : PT.number,
 
-		virtualRendering: PT.oneOf([true])
+		virtualRendering: PT.oneOf([true]),
+
+		preventDefaultVertical: PT.bool,
+		preventDefaultHorizontal: PT.bool
 	},
 
 	getDefaultProps: function(){
@@ -295,18 +296,13 @@ const Scroller = React.createClass({
 	    if (horizontal){
 	    	this.horizontalScrollAt(scrollLeft + delta, event)
 
-	        if (props.preventDefaultHorizontal){
-	        	preventDefault(event)
-	        }
-	        return
-	    }
+        	props.preventDefaultHorizontal && preventDefault(event)
 
-	    //VERTICAL SCROLL
-	    if (virtual && props.scrollBy && scrollStep){
-	        delta = signum(delta) * props.scrollBy * scrollStep
-	    }
+	    } else {
+		    this.verticalScrollAt(scrollTop + delta, event)
 
-	    this.verticalScrollAt(scrollTop + delta, event)
+		    props.preventDefaultVertical && preventDefault(event)
+		}
 	},
 
 	onVerticalScroll: onScroll('vertical'),
