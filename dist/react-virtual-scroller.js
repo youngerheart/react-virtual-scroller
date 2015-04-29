@@ -65,10 +65,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var React = __webpack_require__(1);
 	var LoadMask = __webpack_require__(5);
-	var assign = __webpack_require__(2);
-	var DragHelper = __webpack_require__(3);
+	var assign = __webpack_require__(4);
+	var DragHelper = __webpack_require__(2);
 	var normalize = __webpack_require__(6);
-	var hasTouch = __webpack_require__(4);
+	var hasTouch = __webpack_require__(3);
 	// var raf        = require('raf')
 	// var normalizeWheel = require('./normalizeWheel')
 
@@ -530,41 +530,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	function ToObject(val) {
-		if (val == null) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var keys;
-		var to = ToObject(target);
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = arguments[s];
-			keys = Object.keys(Object(from));
-
-			for (var i = 0; i < keys.length; i++) {
-				to[keys[i]] = from[keys[i]];
-			}
-		}
-
-		return to;
-	};
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var assign = __webpack_require__(2)
+	var assign = __webpack_require__(4)
 	var Region = __webpack_require__(13)
-	var hasTouch = __webpack_require__(4)
+	var hasTouch = __webpack_require__(3)
 	var once   = __webpack_require__(7)
 
 	var Helper = function(config){
@@ -758,11 +726,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 4 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {module.exports = 'ontouchstart' in global || (global.DocumentTouch && document instanceof DocumentTouch)
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var keys;
+		var to = ToObject(target);
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = Object.keys(Object(from));
+
+			for (var i = 0; i < keys.length; i++) {
+				to[keys[i]] = from[keys[i]];
+			}
+		}
+
+		return to;
+	};
+
 
 /***/ },
 /* 5 */
@@ -771,8 +771,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict'
 
 	var React  = __webpack_require__(1)
-	var assign = __webpack_require__(2)
-	var Loader = __webpack_require__(12)
+	var assign = __webpack_require__(4)
+	var Loader = __webpack_require__(8)
 
 	module.exports = React.createClass({
 
@@ -826,11 +826,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var hasOwn      = __webpack_require__(8)
-	var getPrefixed = __webpack_require__(9)
+	var hasOwn      = __webpack_require__(9)
+	var getPrefixed = __webpack_require__(10)
 
-	var map      = __webpack_require__(10)
-	var plugable = __webpack_require__(11)
+	var map      = __webpack_require__(11)
+	var plugable = __webpack_require__(12)
 
 	function plugins(key, value){
 
@@ -918,94 +918,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	module.exports = function(obj, prop){
-		return Object.prototype.hasOwnProperty.call(obj, prop)
-	}
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var getStylePrefixed = __webpack_require__(14)
-	var properties       = __webpack_require__(15)
-
-	module.exports = function(key, value){
-
-		if (!properties[key]){
-			return key
-		}
-
-		return getStylePrefixed(key, value)
-	}
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	module.exports = function(fn, item){
-
-		if (!item){
-			return
-		}
-
-		if (Array.isArray(item)){
-			return item.map(fn).filter(function(x){
-				return !!x
-			})
-		} else {
-			return fn(item)
-		}
-	}
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var getCssPrefixedValue = __webpack_require__(16)
-
-	module.exports = function(target){
-		target.plugins = target.plugins || [
-			(function(){
-				var values = {
-					'flex':1,
-					'inline-flex':1
-				}
-
-				return function(key, value){
-					if (key === 'display' && value in values){
-						return {
-							key  : key,
-							value: getCssPrefixedValue(key, value, true)
-						}
-					}
-				}
-			})()
-		]
-
-		target.plugin = function(fn){
-			target.plugins = target.plugins || []
-
-			target.plugins.push(fn)
-		}
-
-		return target
-	}
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
 	var React  = __webpack_require__(1)
-	var assign = __webpack_require__(2)
+	var assign = __webpack_require__(4)
 
 	module.exports = React.createClass({
 
@@ -1065,12 +979,98 @@ return /******/ (function(modules) { // webpackBootstrap
 	})
 
 /***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	module.exports = function(obj, prop){
+		return Object.prototype.hasOwnProperty.call(obj, prop)
+	}
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var getStylePrefixed = __webpack_require__(14)
+	var properties       = __webpack_require__(15)
+
+	module.exports = function(key, value){
+
+		if (!properties[key]){
+			return key
+		}
+
+		return getStylePrefixed(key, value)
+	}
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	module.exports = function(fn, item){
+
+		if (!item){
+			return
+		}
+
+		if (Array.isArray(item)){
+			return item.map(fn).filter(function(x){
+				return !!x
+			})
+		} else {
+			return fn(item)
+		}
+	}
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var getCssPrefixedValue = __webpack_require__(16)
+
+	module.exports = function(target){
+		target.plugins = target.plugins || [
+			(function(){
+				var values = {
+					'flex':1,
+					'inline-flex':1
+				}
+
+				return function(key, value){
+					if (key === 'display' && value in values){
+						return {
+							key  : key,
+							value: getCssPrefixedValue(key, value, true)
+						}
+					}
+				}
+			})()
+		]
+
+		target.plugin = function(fn){
+			target.plugins = target.plugins || []
+
+			target.plugins.push(fn)
+		}
+
+		return target
+	}
+
+/***/ },
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Region = __webpack_require__(24)
+	var Region = __webpack_require__(20)
 
 	__webpack_require__(17)
 	__webpack_require__(18)
@@ -1256,9 +1256,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(20)
-	var getPrefix    = __webpack_require__(21)
-	var el           = __webpack_require__(22)
+	var toUpperFirst = __webpack_require__(21)
+	var getPrefix    = __webpack_require__(22)
+	var el           = __webpack_require__(23)
 
 	var MEMORY = {}
 	var STYLE
@@ -1353,9 +1353,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var getPrefix     = __webpack_require__(21)
-	var forcePrefixed = __webpack_require__(23)
-	var el            = __webpack_require__(22)
+	var getPrefix     = __webpack_require__(22)
+	var forcePrefixed = __webpack_require__(24)
+	var el            = __webpack_require__(23)
 
 	var MEMORY = {}
 	var STYLE
@@ -1407,7 +1407,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var Region = __webpack_require__(24)
+	var Region = __webpack_require__(20)
 
 	/**
 	 * @static
@@ -1528,7 +1528,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(24)
+	var Region = __webpack_require__(20)
 
 	/**
 	 *
@@ -1572,7 +1572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var ALIGN_TO_NORMALIZED = __webpack_require__(25)
 
-	var Region = __webpack_require__(24)
+	var Region = __webpack_require__(20)
 
 	/**
 	 * @localdoc Given source and target regions, and the given alignments required, returns a region that is the resulting allignment.
@@ -1649,6 +1649,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = __webpack_require__(26)
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	module.exports = function(str){
@@ -1658,15 +1664,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(20)
+	var toUpperFirst = __webpack_require__(21)
 	var prefixes     = ["ms", "Moz", "Webkit", "O"]
 
-	var el = __webpack_require__(22)
+	var el = __webpack_require__(23)
 
 	var ELEMENT
 	var PREFIX
@@ -1697,7 +1703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -1719,13 +1725,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(20)
-	var getPrefix    = __webpack_require__(21)
+	var toUpperFirst = __webpack_require__(21)
+	var getPrefix    = __webpack_require__(22)
 	var properties   = __webpack_require__(15)
 
 	/**
@@ -1748,18 +1754,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(26)
-
-/***/ },
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
-	var Region = __webpack_require__(24)
+	var Region = __webpack_require__(20)
 
 	/**
 	 *
@@ -1941,11 +1941,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var hasOwn    = __webpack_require__(32)
-	var newify    = __webpack_require__(30)
+	var hasOwn    = __webpack_require__(31)
+	var newify    = __webpack_require__(32)
 
-	var assign      = __webpack_require__(2);
-	var EventEmitter = __webpack_require__(31).EventEmitter
+	var assign      = __webpack_require__(4);
+	var EventEmitter = __webpack_require__(30).EventEmitter
 
 	var inherits = __webpack_require__(27)
 	var VALIDATE = __webpack_require__(28)
@@ -3047,7 +3047,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var hasOwn   = __webpack_require__(32)
+	var hasOwn   = __webpack_require__(31)
 	var VALIDATE = __webpack_require__(28)
 
 	module.exports = function(REGION){
@@ -3262,16 +3262,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var getInstantiatorFunction = __webpack_require__(33)
-
-	module.exports = function(fn, args){
-		return getInstantiatorFunction(args.length)(fn, args)
-	}
-
-/***/ },
-/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -3578,7 +3568,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -3619,6 +3609,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = curry(function(object, property){
 	    return hasOwn.call(object, property)
 	})
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var getInstantiatorFunction = __webpack_require__(33)
+
+	module.exports = function(fn, args){
+		return getInstantiatorFunction(args.length)(fn, args)
+	}
 
 /***/ },
 /* 33 */
