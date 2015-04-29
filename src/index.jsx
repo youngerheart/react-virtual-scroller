@@ -7,8 +7,9 @@ var DragHelper = require('drag-helper')
 var normalize  = require('react-style-normalizer')
 var hasTouch   = require('has-touch')
 var raf        = require('raf')
+var normalizeWheel = require('./normalizeWheel')
 
-const preventDefault = event => event.preventDefault()
+const preventDefault = event => event && event.preventDefault()
 const signum         = x     => x < 0? -1: 1
 const emptyFn        = ()    => {}
 const ABS            = Math.abs
@@ -17,35 +18,52 @@ const LoadMaskFactory = React.createFactory(LoadMask)
 
 var horizontalScrollbarStyle = {}
 
-var IS_MAC
-if (global && global.navigator && global.navigator.appVersion && global.navigator.appVersion.indexOf("Mac") != -1){
-    IS_MAC = true
-    //on a MAC
-	horizontalScrollbarStyle.position = 'absolute'
+var IS_MAC     = global && global.navigator && global.navigator.appVersion && global.navigator.appVersion.indexOf("Mac") != -1
+var IS_FIREFOX = global && global.navigator && global.navigator.userAgent && !!~global.navigator.userAgent.toLowerCase().indexOf('firefox')
+
+if (IS_MAC){
+    horizontalScrollbarStyle.position = 'absolute'
 	horizontalScrollbarStyle.height   = 20
 }
 
 const PT = React.PropTypes
 const DISPLAY_NAME = 'Scroller'
 
+const ON_OVERFLOW_NAMES = {
+	vertical  : 'onVerticalScrollOverflow',
+	horizontal: 'onHorizontalScrollOverflow',
+}
+
+const ON_SCROLL_NAMES = {
+	vertical  : 'onVerticalScroll',
+	horizontal: 'onHorizontalScroll',
+}
+
+/**
+ * Called on scroll by mouse wheel
+ */
 const syncScrollbar = function(orientation) {
 
 	var refNames = {
 		vertical  : 'verticalScrollbar',
 		horizontal: 'horizontalScrollbar'
 	}
+
 	return function(scrollPos, event){
+
 		var domNode       = React.findDOMNode(this.refs[refNames[orientation]])
 		var scrollPosName = orientation == 'horizontal'? 'scrollLeft': 'scrollTop'
+		var overflowCallback
 
 		domNode[scrollPosName] = scrollPos
 
 		var newScrollPos = domNode[scrollPosName]
 
 		if (newScrollPos != scrollPos){
-		    //overflowing either to left, or to right
+			// overflowCallback = this.props[ON_OVERFLOW_NAMES[orientation]]
+			// overflowCallback && overflowCallback(signum(scrollPos), newScrollPos)
 		} else {
-		    event && preventDefault(event)
+		    preventDefault(event)
 		}
 	}
 }
@@ -66,6 +84,39 @@ const scrollAt = function(orientation){
 	    raf(function(){
 	        this.mouseWheelScroll = false
 	    }.bind(this))
+	}
+}
+
+const onScroll = function(orientation){
+
+	var clientHeightNames = {
+		vertical  : 'clientHeight',
+		horizontal: 'clientWidth'
+	}
+
+	var scrollHeightNames = {
+		vertical  : 'scrollHeight',
+		horizontal: 'scrollWidth'
+	}
+
+	return function(event){
+
+		var scrollPosName = orientation == 'horizontal'? 'scrollLeft': 'scrollTop'
+		var target        = event.target
+		var scrollPos     = target[scrollPosName]
+
+		var callback = this.props[ON_OVERFLOW_NAMES[orientation]]
+
+	    // if (!this.mouseWheelScroll && callback){
+	    if (callback){
+	        if (scrollPos == 0){
+	        	callback(-1, scrollPos)
+	        } else if (scrollPos + target[clientHeightNames[orientation]] >= target[scrollHeightNames[orientation]]){
+	        	callback(1, scrollPos)
+	        }
+	    }
+
+	    ;(this.props[ON_SCROLL_NAMES[orientation]] || emptyFn)(scrollPos)
 	}
 }
 
@@ -94,6 +145,7 @@ const Scroller = React.createClass({
 			PT.bool,
 			PT.func
 		]),
+
 		loading : PT.bool,
 		normalizeStyles: PT.bool,
 
@@ -105,6 +157,10 @@ const Scroller = React.createClass({
 
 		height: PT.number,
 		width : PT.number,
+
+		minScrollStep          : PT.number,
+		minHorizontalScrollStep: PT.number,
+		minVerticalScrollStep  : PT.number,
 
 		virtualRendering: PT.oneOf([true])
 	},
@@ -119,7 +175,15 @@ const Scroller = React.createClass({
 
 			scrollStep: 10,
 			scrollTop : 0,
-			scrollLeft: 0
+			scrollLeft: 0,
+
+			minScrollStep: 10,
+
+			minHorizontalScrollStep: 1,
+
+			//since FF goes back in browser history on scroll too soon
+			//chrome and others also do this, but the normal preventDefault in syncScrollbar fn prevents this
+			preventDefaultHorizontal: IS_FIREFOX
 		}
 	},
 
@@ -138,10 +202,17 @@ const Scroller = React.createClass({
 		    events.onTouchStart = this.handleTouchStart
 		}
 
+		//extra div needed for SAFARI V SCROLL
+        //maxWidth needed for FF - see
+        //http://stackoverflow.com/questions/27424831/firefox-flexbox-overflow
+        //http://stackoverflow.com/questions/27472595/firefox-34-ignoring-max-width-for-flexbox
+		var content = <div className="z-content-wrapper-fix" style={{maxWidth: 'calc(100% - ' + props.scrollbarSize + 'px)'}}
+						children={props.children} />
+
 		return <div {...props}>
 			{loadMask}
 			<div className="z-content-wrapper" {...events}>
-				{props.children}
+				{content}
 				{verticalScrollbar}
 			</div>
 
@@ -185,75 +256,59 @@ const Scroller = React.createClass({
 	    })
 
 	    event.stopPropagation()
-	    event.preventDefault()
+	    preventDefault(event)
 	},
 
 	handleWheel: function(event){
 
-		var props      = this.props
-		var delta      = event.deltaY
+		var props           = this.props
+		var normalizedEvent = normalizeWheel(event)
+
+		var virtual    = props.virtualRendering
+		var horizontal = event.shiftKey
+		var scrollStep = props.scrollStep
+		var minScrollStep = props.minScrollStep
 
 		var scrollTop  = props.scrollTop
 		var scrollLeft = props.scrollLeft
 
-	    if (delta && ABS(delta) < 40){
-	        delta = signum(delta) * 40
-	    }
+		var delta = normalizedEvent.pixelY
 
-	    if (event.shiftKey){
+		if (horizontal){
+			delta = delta || normalizedEvent.pixelX
 
-	    	//HORIZONTAL SCROLL
-	        if (!delta){
-	            delta = event.deltaX
+			minScrollStep = props.minHorizontalScrollStep || minScrollStep
+		} else {
+			minScrollStep = props.minVerticalScrollStep   || minScrollStep
+		}
+
+		if (typeof props.interceptWheelScroll == 'function'){
+			delta = props.interceptWheelScroll(delta, normalizedEvent, event)
+		} else if (minScrollStep){
+			if (ABS(delta) < minScrollStep){
+				delta = signum(delta) * minScrollStep
+			}
+		}
+
+	    if (horizontal){
+	    	this.horizontalScrollAt(scrollLeft + delta, event)
+
+	        if (props.preventDefaultHorizontal){
+	        	preventDefault(event)
 	        }
-
-	        this.horizontalScrollAt(scrollLeft + delta)
 	        return
 	    }
 
 	    //VERTICAL SCROLL
-		var deltaY     = delta
-		var virtual    = props.virtualRendering
-		var scrollStep = props.scrollStep
-
-	    if (virtual && deltaY < 0 && -deltaY < scrollStep){
-	        //when scrolling to go up, account for the case where abs(deltaY)
-	        //is less than the scrollStep, as this results in no scrolling
-	        //so make sure it's at least deltaY
-	        deltaY = -scrollStep
+	    if (virtual && props.scrollBy && scrollStep){
+	        delta = signum(delta) * props.scrollBy * scrollStep
 	    }
 
-	    if (virtual && props.scrollBy){
-	        deltaY = signum(deltaY) * props.scrollBy * scrollStep
-	    }
-
-	    scrollTop += deltaY
-
-	    this.verticalScrollAt(scrollTop, event)
+	    this.verticalScrollAt(scrollTop + delta, event)
 	},
 
-	handleHorizontalScroll: function(event){
-		var target     = event.target
-		var scrollLeft = target.scrollLeft
-
-		;(this.props.onHorizontalScroll || emptyFn)(scrollLeft)
-	},
-
-	handleVerticalScroll: function(event){
-
-		var target    = event.target
-		var scrollTop = target.scrollTop
-
-	    // if (!this.mouseWheelScroll && this.props.onScrollOverflow){
-	    //     if (scrollTop == 0){
-	    //         this.props.onScrollOverflow(-1, scrollTop)
-	    //     } else if (scrollTop + target.clientHeight >= target.scrollHeight){
-	    //         this.props.onScrollOverflow(1, scrollTop)
-	    //     }
-	    // }
-
-	    ;(this.props.onVerticalScroll || emptyFn)(scrollTop)
-	},
+	onVerticalScroll: onScroll('vertical'),
+	onHorizontalScroll: onScroll('horizontal'),
 
 	verticalScrollAt  : scrollAt('vertical'),
 	horizontalScrollAt: scrollAt('horizontal'),
@@ -272,7 +327,7 @@ const Scroller = React.createClass({
 			width: props.scrollbarSize
 		}
 
-		var onScroll = this.handleVerticalScroll
+		var onScroll = this.onVerticalScroll
 
 		return <div className="z-vertical-scrollbar" style={verticalScrollbarStyle}>
 		    <div
@@ -287,7 +342,7 @@ const Scroller = React.createClass({
 
 	renderHorizontalScrollbar: function(props) {
 		var scrollbar
-		var onScroll = this.handleHorizontalScroll
+		var onScroll = this.onHorizontalScroll
 		var style    = horizontalScrollbarStyle
 		var minWidth = props.scrollWidth
 
