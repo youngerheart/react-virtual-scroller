@@ -6,8 +6,8 @@ var assign     = require('object-assign')
 var DragHelper = require('drag-helper')
 var normalize  = require('react-style-normalizer')
 var hasTouch   = require('has-touch')
-var raf        = require('raf')
-var normalizeWheel = require('./normalizeWheel')
+// var raf        = require('raf')
+// var normalizeWheel = require('./normalizeWheel')
 
 const preventDefault = event => event && event.preventDefault()
 const signum         = x     => x < 0? -1: 1
@@ -77,13 +77,13 @@ const scrollAt = function(orientation){
 					syncVerticalScrollbar
 
 	return function(scrollPos, event){
-	    this.mouseWheelScroll = true
+	    // this.mouseWheelScroll = true
 
 	    syncFn.call(this, Math.round(scrollPos), event)
 
-	    raf(function(){
-	        this.mouseWheelScroll = false
-	    }.bind(this))
+	    // raf(function(){
+	    //     this.mouseWheelScroll = false
+	    // }.bind(this))
 	}
 }
 
@@ -105,18 +105,19 @@ const onScroll = function(orientation){
 		var target        = event.target
 		var scrollPos     = target[scrollPosName]
 
-		var callback = this.props[ON_OVERFLOW_NAMES[orientation]]
+		var onScroll   = this.props[ON_SCROLL_NAMES[orientation]]
+		var onOverflow = this.props[ON_OVERFLOW_NAMES[orientation]]
 
-	    // if (!this.mouseWheelScroll && callback){
-	    if (callback){
+	    // if (!this.mouseWheelScroll && onOverflow){
+	    if (onOverflow){
 	        if (scrollPos == 0){
-	        	callback(-1, scrollPos)
+	        	onOverflow(-1, scrollPos)
 	        } else if (scrollPos + target[clientHeightNames[orientation]] >= target[scrollHeightNames[orientation]]){
-	        	callback(1, scrollPos)
+	        	onOverflow(1, scrollPos)
 	        }
 	    }
 
-	    ;(this.props[ON_SCROLL_NAMES[orientation]] || emptyFn)(scrollPos)
+	    ;(onScroll || emptyFn)(scrollPos)
 	}
 }
 
@@ -179,7 +180,7 @@ const Scroller = React.createClass({
 
 			minScrollStep: 10,
 
-			minHorizontalScrollStep: 1,
+			minHorizontalScrollStep: IS_FIREFOX? 40: 1,
 
 			//since FF goes back in browser history on scroll too soon
 			//chrome and others also do this, but the normal preventDefault in syncScrollbar fn prevents this
@@ -262,7 +263,7 @@ const Scroller = React.createClass({
 	handleWheel: function(event){
 
 		var props           = this.props
-		var normalizedEvent = normalizeWheel(event)
+		// var normalizedEvent = normalizeWheel(event)
 
 		var virtual    = props.virtualRendering
 		var horizontal = event.shiftKey
@@ -272,10 +273,12 @@ const Scroller = React.createClass({
 		var scrollTop  = props.scrollTop
 		var scrollLeft = props.scrollLeft
 
-		var delta = normalizedEvent.pixelY
+		// var delta = normalizedEvent.pixelY
+		var delta = event.deltaY
 
 		if (horizontal){
-			delta = delta || normalizedEvent.pixelX
+			// delta = delta || normalizedEvent.pixelX
+			delta = delta || event.deltaX
 
 			minScrollStep = props.minHorizontalScrollStep || minScrollStep
 		} else {
