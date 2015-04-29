@@ -1,12 +1,12 @@
 'use strict'
 
-var React      = require('react')
-var LoadMask   = require('react-load-mask')
-var assign     = require('object-assign')
-var DragHelper = require('drag-helper')
-var normalize  = require('react-style-normalizer')
-var hasTouch   = require('has-touch')
-// var raf        = require('raf')
+const React      = require('react')
+const LoadMask   = require('react-load-mask')
+const assign     = require('object-assign')
+const DragHelper = require('drag-helper')
+const normalize  = require('react-style-normalizer')
+const hasTouch   = require('has-touch')
+const raf        = require('raf')
 // var normalizeWheel = require('./normalizeWheel')
 
 const preventDefault = event => event && event.preventDefault()
@@ -174,7 +174,6 @@ const Scroller = React.createClass({
 			virtualRendering: true, //FOR NOW, only true is supported
 			scrollbarSize: 20,
 
-			scrollStep: 10,
 			scrollTop : 0,
 			scrollLeft: 0,
 
