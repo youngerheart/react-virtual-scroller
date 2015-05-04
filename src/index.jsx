@@ -210,7 +210,9 @@ const Scroller = React.createClass({
 		var content = <div className="z-content-wrapper-fix" style={{maxWidth: 'calc(100% - ' + props.scrollbarSize + 'px)'}}
 						children={props.children} />
 
-		return <div {...props}>
+		var renderProps = this.prepareRenderProps(props)
+
+		return <div {...renderProps}>
 			{loadMask}
 			<div className="z-content-wrapper" {...events}>
 				{content}
@@ -219,6 +221,15 @@ const Scroller = React.createClass({
 
 			{horizontalScrollbar}
 		</div>
+	},
+
+	prepareRenderProps: function(props) {
+		var renderProps = assign({}, props)
+
+		delete renderProps.height
+		delete renderProps.width
+
+		return renderProps
 	},
 
 	handleTouchStart: function(event) {
