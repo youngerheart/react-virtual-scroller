@@ -265,9 +265,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			var content = React.createElement('div', { className: 'z-content-wrapper-fix', style: { maxWidth: 'calc(100% - ' + props.scrollbarSize + 'px)' },
 				children: props.children });
 
+			var renderProps = this.prepareRenderProps(props);
+
 			return React.createElement(
 				'div',
-				props,
+				renderProps,
 				loadMask,
 				React.createElement(
 					'div',
@@ -277,6 +279,15 @@ return /******/ (function(modules) { // webpackBootstrap
 				),
 				horizontalScrollbar
 			);
+		},
+
+		prepareRenderProps: function prepareRenderProps(props) {
+			var renderProps = assign({}, props);
+
+			delete renderProps.height;
+			delete renderProps.width;
+
+			return renderProps;
 		},
 
 		handleTouchStart: function handleTouchStart(event) {
@@ -1066,7 +1077,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(24)
 
 	__webpack_require__(17)
 	__webpack_require__(18)
@@ -1252,8 +1263,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(24)
-	var getPrefix    = __webpack_require__(20)
+	var toUpperFirst = __webpack_require__(20)
+	var getPrefix    = __webpack_require__(21)
 	var el           = __webpack_require__(22)
 
 	var MEMORY = {}
@@ -1349,8 +1360,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var getPrefix     = __webpack_require__(20)
-	var forcePrefixed = __webpack_require__(21)
+	var getPrefix     = __webpack_require__(21)
+	var forcePrefixed = __webpack_require__(23)
 	var el            = __webpack_require__(22)
 
 	var MEMORY = {}
@@ -1403,7 +1414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(24)
 
 	/**
 	 * @static
@@ -1524,7 +1535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(24)
 
 	/**
 	 *
@@ -1568,7 +1579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var ALIGN_TO_NORMALIZED = __webpack_require__(25)
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(24)
 
 	/**
 	 * @localdoc Given source and target regions, and the given alignments required, returns a region that is the resulting allignment.
@@ -1647,7 +1658,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(24)
+	module.exports = function(str){
+		return str?
+				str.charAt(0).toUpperCase() + str.slice(1):
+				''
+	}
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var toUpperFirst = __webpack_require__(20)
 	var prefixes     = ["ms", "Moz", "Webkit", "O"]
 
 	var el = __webpack_require__(22)
@@ -1681,35 +1704,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var toUpperFirst = __webpack_require__(24)
-	var getPrefix    = __webpack_require__(20)
-	var properties   = __webpack_require__(15)
-
-	/**
-	 * Returns the given key prefixed, if the property is found in the prefixProps map.
-	 *
-	 * Does not test if the property supports the given value unprefixed.
-	 * If you need this, use './getPrefixed' instead
-	 */
-	module.exports = function(key, value){
-
-		if (!properties[key]){
-			return key
-		}
-
-		var prefix = getPrefix(key)
-
-		return prefix?
-					prefix + toUpperFirst(key):
-					key
-	}
-
-/***/ },
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1735,19 +1729,36 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(26)
+	'use strict';
+
+	var toUpperFirst = __webpack_require__(20)
+	var getPrefix    = __webpack_require__(21)
+	var properties   = __webpack_require__(15)
+
+	/**
+	 * Returns the given key prefixed, if the property is found in the prefixProps map.
+	 *
+	 * Does not test if the property supports the given value unprefixed.
+	 * If you need this, use './getPrefixed' instead
+	 */
+	module.exports = function(key, value){
+
+		if (!properties[key]){
+			return key
+		}
+
+		var prefix = getPrefix(key)
+
+		return prefix?
+					prefix + toUpperFirst(key):
+					key
+	}
 
 /***/ },
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	module.exports = function(str){
-		return str?
-				str.charAt(0).toUpperCase() + str.slice(1):
-				''
-	}
+	module.exports = __webpack_require__(26)
 
 /***/ },
 /* 25 */
@@ -1755,7 +1766,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(24)
 
 	/**
 	 *
