@@ -316,6 +316,16 @@ const Scroller = React.createClass({
 		}
 	},
 
+	componentDidMount: function() {
+		var dom = React.findDOMNode(this.refs.horizontalScrollbar)
+
+		if (dom){
+			var display = dom.style.display
+			dom.style.display = 'none'
+			dom.style.display = display
+		}
+	},
+
 	onVerticalScroll: onScroll('vertical'),
 	onHorizontalScroll: onScroll('horizontal'),
 
