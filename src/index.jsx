@@ -323,12 +323,12 @@ const Scroller = React.createClass({
 	},
 
 	fixHorizontalScrollbar: function() {
-		var dom = React.findDOMNode(this.refs.horizontalScrollbar)
+		var dom = React.findDOMNode(this.refs.horizontalScroller)
 
 		if (dom){
 			var height = dom.style.height
-			dom.style.height = 0
-			dom.style.height = height
+
+			dom.style.height = height == '0.2px'? '0.1px': '0.2px'
 		}
 	},
 
@@ -371,7 +371,7 @@ const Scroller = React.createClass({
 		var style    = horizontalScrollbarStyle
 		var minWidth = props.scrollWidth
 
-		var scroller = <div className="z-horizontal-scroller" style={{width: minWidth}} />
+		var scroller = <div ref="horizontalScroller" className="z-horizontal-scroller" style={{width: minWidth}} />
 
 		if (IS_MAC){
 		    //needed for mac safari
