@@ -317,6 +317,12 @@ const Scroller = React.createClass({
 	},
 
 	componentDidMount: function() {
+		this.fixHorizontalScrollbar()
+
+		setTimeout(this.fixHorizontalScrollbar, 0)
+	},
+
+	fixHorizontalScrollbar: function() {
 		var dom = React.findDOMNode(this.refs.horizontalScrollbar)
 
 		if (dom){

@@ -373,6 +373,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		componentDidMount: function componentDidMount() {
+			this.fixHorizontalScrollbar();
+
+			setTimeout(this.fixHorizontalScrollbar, 0);
+		},
+
+		fixHorizontalScrollbar: function fixHorizontalScrollbar() {
 			var dom = React.findDOMNode(this.refs.horizontalScrollbar);
 
 			if (dom) {
@@ -1012,8 +1018,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var getStylePrefixed = __webpack_require__(14)
-	var properties       = __webpack_require__(15)
+	var getStylePrefixed = __webpack_require__(15)
+	var properties       = __webpack_require__(16)
 
 	module.exports = function(key, value){
 
@@ -1051,7 +1057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var getCssPrefixedValue = __webpack_require__(16)
+	var getCssPrefixedValue = __webpack_require__(14)
 
 	module.exports = function(target){
 		target.plugins = target.plugins || [
@@ -1273,6 +1279,60 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var getPrefix     = __webpack_require__(22)
+	var forcePrefixed = __webpack_require__(24)
+	var el            = __webpack_require__(23)
+
+	var MEMORY = {}
+	var STYLE
+	var ELEMENT
+
+	module.exports = function(key, value, force){
+
+	    ELEMENT = ELEMENT || el()
+	    STYLE   = STYLE   ||  ELEMENT.style
+
+	    var k = key + ': ' + value
+
+	    if (MEMORY[k]){
+	        return MEMORY[k]
+	    }
+
+	    var prefix
+	    var prefixed
+	    var prefixedValue
+
+	    if (force || !(key in STYLE)){
+
+	        prefix = getPrefix('appearance')
+
+	        if (prefix){
+	            prefixed = forcePrefixed(key, value)
+
+	            prefixedValue = '-' + prefix.toLowerCase() + '-' + value
+
+	            if (prefixed in STYLE){
+	                ELEMENT.style[prefixed] = ''
+	                ELEMENT.style[prefixed] = prefixedValue
+
+	                if (ELEMENT.style[prefixed] !== ''){
+	                    value = prefixedValue
+	                }
+	            }
+	        }
+	    }
+
+	    MEMORY[k] = value
+
+	    return value
+	}
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
 	var toUpperFirst = __webpack_require__(21)
 	var getPrefix    = __webpack_require__(22)
 	var el           = __webpack_require__(23)
@@ -1324,7 +1384,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1362,60 +1422,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'animationPlayState': 1,
 	  'animationFillMode': 1,
 	  'appearance': 1
-	}
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var getPrefix     = __webpack_require__(22)
-	var forcePrefixed = __webpack_require__(24)
-	var el            = __webpack_require__(23)
-
-	var MEMORY = {}
-	var STYLE
-	var ELEMENT
-
-	module.exports = function(key, value, force){
-
-	    ELEMENT = ELEMENT || el()
-	    STYLE   = STYLE   ||  ELEMENT.style
-
-	    var k = key + ': ' + value
-
-	    if (MEMORY[k]){
-	        return MEMORY[k]
-	    }
-
-	    var prefix
-	    var prefixed
-	    var prefixedValue
-
-	    if (force || !(key in STYLE)){
-
-	        prefix = getPrefix('appearance')
-
-	        if (prefix){
-	            prefixed = forcePrefixed(key, value)
-
-	            prefixedValue = '-' + prefix.toLowerCase() + '-' + value
-
-	            if (prefixed in STYLE){
-	                ELEMENT.style[prefixed] = ''
-	                ELEMENT.style[prefixed] = prefixedValue
-
-	                if (ELEMENT.style[prefixed] !== ''){
-	                    value = prefixedValue
-	                }
-	            }
-	        }
-	    }
-
-	    MEMORY[k] = value
-
-	    return value
 	}
 
 /***/ },
@@ -1749,7 +1755,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var toUpperFirst = __webpack_require__(21)
 	var getPrefix    = __webpack_require__(22)
-	var properties   = __webpack_require__(15)
+	var properties   = __webpack_require__(16)
 
 	/**
 	 * Returns the given key prefixed, if the property is found in the prefixProps map.
@@ -1958,8 +1964,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var hasOwn    = __webpack_require__(32)
-	var newify    = __webpack_require__(31)
+	var hasOwn    = __webpack_require__(31)
+	var newify    = __webpack_require__(32)
 
 	var assign      = __webpack_require__(4);
 	var EventEmitter = __webpack_require__(30).EventEmitter
@@ -3064,7 +3070,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var hasOwn   = __webpack_require__(32)
+	var hasOwn   = __webpack_require__(31)
 	var VALIDATE = __webpack_require__(28)
 
 	module.exports = function(REGION){
@@ -3588,16 +3594,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getInstantiatorFunction = __webpack_require__(33)
-
-	module.exports = function(fn, args){
-		return getInstantiatorFunction(args.length)(fn, args)
-	}
-
-/***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
 	'use strict'
 
 	var hasOwn = Object.prototype.hasOwnProperty
@@ -3636,6 +3632,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = curry(function(object, property){
 	    return hasOwn.call(object, property)
 	})
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var getInstantiatorFunction = __webpack_require__(33)
+
+	module.exports = function(fn, args){
+		return getInstantiatorFunction(args.length)(fn, args)
+	}
 
 /***/ },
 /* 33 */
