@@ -56,19 +56,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
+	var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 	Object.defineProperty(exports, '__esModule', {
 		value: true
 	});
+
+	var _Component2 = __webpack_require__(7);
+
+	var _Component3 = _interopRequireDefault(_Component2);
+
 	'use strict';
 
 	var React = __webpack_require__(1);
 	var LoadMask = __webpack_require__(5);
-	var assign = __webpack_require__(2);
-	var DragHelper = __webpack_require__(6);
-	var normalize = __webpack_require__(4);
-	var hasTouch = __webpack_require__(3);
+	var assign = __webpack_require__(4);
+	var DragHelper = __webpack_require__(3);
+	var normalize = __webpack_require__(6);
+	var hasTouch = __webpack_require__(2);
 
 	var preventDefault = function preventDefault(event) {
 		return event && event.preventDefault();
@@ -116,7 +129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		return function (scrollPos, event) {
 
-			var domNode = React.findDOMNode(this.refs[refNames[orientation]]);
+			var domNode = orientation == 'horizontal' ? this.getHorizontalScrollbarNode() : this.getVerticalScrollbarNode();
 			var scrollPosName = orientation == 'horizontal' ? 'scrollLeft' : 'scrollTop';
 			var overflowCallback;
 
@@ -193,201 +206,330 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * <Scroller loading={true} loadMask={mask}
 	 *
 	 */
-	var Scroller = React.createClass({
 
-		displayName: DISPLAY_NAME,
+	var Scroller = (function (_Component) {
+		function Scroller() {
+			_classCallCheck(this, Scroller);
 
-		propTypes: {
-			loadMask: PT.oneOfType([PT.bool, PT.func]),
-
-			loading: PT.bool,
-			normalizeStyles: PT.bool,
-
-			scrollTop: PT.number,
-			scrollLeft: PT.number,
-
-			scrollWidth: PT.number.isRequired,
-			scrollHeight: PT.number.isRequired,
-
-			height: PT.number,
-			width: PT.number,
-
-			minScrollStep: PT.number,
-			minHorizontalScrollStep: PT.number,
-			minVerticalScrollStep: PT.number,
-
-			virtualRendering: PT.oneOf([true]),
-
-			preventDefaultVertical: PT.bool,
-			preventDefaultHorizontal: PT.bool
-		},
-
-		getDefaultProps: function getDefaultProps() {
-			return {
-				'data-display-name': DISPLAY_NAME,
-				loadMask: true,
-
-				virtualRendering: true, //FOR NOW, only true is supported
-				scrollbarSize: 20,
-
-				scrollTop: 0,
-				scrollLeft: 0,
-
-				minScrollStep: 10,
-
-				minHorizontalScrollStep: IS_FIREFOX ? 40 : 1,
-
-				//since FF goes back in browser history on scroll too soon
-				//chrome and others also do this, but the normal preventDefault in syncScrollbar fn prevents this
-				preventDefaultHorizontal: IS_FIREFOX
-			};
-		},
-
-		render: function render() {
-			var props = this.p = this.prepareProps(this.props);
-
-			var loadMask = this.renderLoadMask(props);
-			var horizontalScrollbar = this.renderHorizontalScrollbar(props);
-			var verticalScrollbar = this.renderVerticalScrollbar(props);
-
-			var events = {};
-
-			if (!hasTouch) {
-				events.onWheel = this.handleWheel;
-			} else {
-				events.onTouchStart = this.handleTouchStart;
+			if (_Component != null) {
+				_Component.apply(this, arguments);
 			}
+		}
 
-			//extra div needed for SAFARI V SCROLL
-			//maxWidth needed for FF - see
-			//http://stackoverflow.com/questions/27424831/firefox-flexbox-overflow
-			//http://stackoverflow.com/questions/27472595/firefox-34-ignoring-max-width-for-flexbox
-			var content = React.createElement('div', { className: 'z-content-wrapper-fix', style: { maxWidth: 'calc(100% - ' + props.scrollbarSize + 'px)' },
-				children: props.children });
+		_inherits(Scroller, _Component);
 
-			var renderProps = this.prepareRenderProps(props);
+		_createClass(Scroller, [{
+			key: 'render',
+			value: function render() {
+				var props = this.p = this.prepareProps(this.props);
 
-			return React.createElement(
-				'div',
-				renderProps,
-				loadMask,
-				React.createElement(
+				var loadMask = this.renderLoadMask(props);
+				var horizontalScrollbar = this.renderHorizontalScrollbar(props);
+				var verticalScrollbar = this.renderVerticalScrollbar(props);
+
+				var events = {};
+
+				if (!hasTouch) {
+					events.onWheel = this.handleWheel;
+				} else {
+					events.onTouchStart = this.handleTouchStart;
+				}
+
+				//extra div needed for SAFARI V SCROLL
+				//maxWidth needed for FF - see
+				//http://stackoverflow.com/questions/27424831/firefox-flexbox-overflow
+				//http://stackoverflow.com/questions/27472595/firefox-34-ignoring-max-width-for-flexbox
+				var content = React.createElement('div', { className: 'z-content-wrapper-fix', style: { maxWidth: 'calc(100% - ' + props.scrollbarSize + 'px)' },
+					children: props.children });
+
+				var renderProps = this.prepareRenderProps(props);
+
+				return React.createElement(
 					'div',
-					_extends({ className: 'z-content-wrapper' }, events),
-					content,
-					verticalScrollbar
-				),
-				horizontalScrollbar
-			);
-		},
+					renderProps,
+					loadMask,
+					React.createElement(
+						'div',
+						_extends({ className: 'z-content-wrapper' }, events),
+						content,
+						verticalScrollbar
+					),
+					horizontalScrollbar
+				);
+			}
+		}, {
+			key: 'prepareRenderProps',
+			value: function prepareRenderProps(props) {
+				var renderProps = assign({}, props);
 
-		prepareRenderProps: function prepareRenderProps(props) {
-			var renderProps = assign({}, props);
+				delete renderProps.height;
+				delete renderProps.width;
 
-			delete renderProps.height;
-			delete renderProps.width;
+				return renderProps;
+			}
+		}, {
+			key: 'handleTouchStart',
+			value: function handleTouchStart(event) {
 
-			return renderProps;
-		},
+				var props = this.props;
+				var scroll = {
+					top: props.scrollTop,
+					left: props.scrollLeft
+				};
 
-		handleTouchStart: function handleTouchStart(event) {
+				var newScrollPos;
+				var side;
 
-			var props = this.props;
-			var scroll = {
-				top: props.scrollTop,
-				left: props.scrollLeft
-			};
+				DragHelper(event, {
+					scope: this,
+					onDrag: function onDrag(event, config) {
+						if (config.diff.top == 0 && config.diff.left == 0) {
+							return;
+						}
 
-			var newScrollPos;
-			var side;
+						if (!side) {
+							side = ABS(config.diff.top) > ABS(config.diff.left) ? 'top' : 'left';
+						}
 
-			DragHelper(event, {
-				scope: this,
-				onDrag: function onDrag(event, config) {
-					if (config.diff.top == 0 && config.diff.left == 0) {
-						return;
+						var diff = config.diff[side];
+
+						newScrollPos = scroll[side] - diff;
+
+						if (side == 'top') {
+							this.verticalScrollAt(newScrollPos, event);
+						} else {
+							this.horizontalScrollAt(newScrollPos, event);
+						}
 					}
+				});
 
-					if (!side) {
-						side = ABS(config.diff.top) > ABS(config.diff.left) ? 'top' : 'left';
-					}
+				event.stopPropagation();
+				preventDefault(event);
+			}
+		}, {
+			key: 'handleWheel',
+			value: function handleWheel(event) {
 
-					var diff = config.diff[side];
+				var props = this.props;
+				// var normalizedEvent = normalizeWheel(event)
 
-					newScrollPos = scroll[side] - diff;
+				var virtual = props.virtualRendering;
+				var horizontal = event.shiftKey;
+				var scrollStep = props.scrollStep;
+				var minScrollStep = props.minScrollStep;
 
-					if (side == 'top') {
-						this.verticalScrollAt(newScrollPos, event);
-					} else {
-						this.horizontalScrollAt(newScrollPos, event);
+				var scrollTop = props.scrollTop;
+				var scrollLeft = props.scrollLeft;
+
+				// var delta = normalizedEvent.pixelY
+				var delta = event.deltaY;
+
+				if (horizontal) {
+					// delta = delta || normalizedEvent.pixelX
+					delta = delta || event.deltaX;
+
+					minScrollStep = props.minHorizontalScrollStep || minScrollStep;
+				} else {
+					minScrollStep = props.minVerticalScrollStep || minScrollStep;
+				}
+
+				if (typeof props.interceptWheelScroll == 'function') {
+					delta = props.interceptWheelScroll(delta, normalizedEvent, event);
+				} else if (minScrollStep) {
+					if (ABS(delta) < minScrollStep) {
+						delta = signum(delta) * minScrollStep;
 					}
 				}
-			});
 
-			event.stopPropagation();
-			preventDefault(event);
-		},
+				if (horizontal) {
+					this.horizontalScrollAt(scrollLeft + delta, event);
 
-		handleWheel: function handleWheel(event) {
+					props.preventDefaultHorizontal && preventDefault(event);
+				} else {
+					this.verticalScrollAt(scrollTop + delta, event);
 
-			var props = this.props;
-			// var normalizedEvent = normalizeWheel(event)
-
-			var virtual = props.virtualRendering;
-			var horizontal = event.shiftKey;
-			var scrollStep = props.scrollStep;
-			var minScrollStep = props.minScrollStep;
-
-			var scrollTop = props.scrollTop;
-			var scrollLeft = props.scrollLeft;
-
-			// var delta = normalizedEvent.pixelY
-			var delta = event.deltaY;
-
-			if (horizontal) {
-				// delta = delta || normalizedEvent.pixelX
-				delta = delta || event.deltaX;
-
-				minScrollStep = props.minHorizontalScrollStep || minScrollStep;
-			} else {
-				minScrollStep = props.minVerticalScrollStep || minScrollStep;
-			}
-
-			if (typeof props.interceptWheelScroll == 'function') {
-				delta = props.interceptWheelScroll(delta, normalizedEvent, event);
-			} else if (minScrollStep) {
-				if (ABS(delta) < minScrollStep) {
-					delta = signum(delta) * minScrollStep;
+					props.preventDefaultVertical && preventDefault(event);
 				}
 			}
+		}, {
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				this.fixHorizontalScrollbar();(this.props.onMount || emptyFn)(this);
 
-			if (horizontal) {
-				this.horizontalScrollAt(scrollLeft + delta, event);
-
-				props.preventDefaultHorizontal && preventDefault(event);
-			} else {
-				this.verticalScrollAt(scrollTop + delta, event);
-
-				props.preventDefaultVertical && preventDefault(event);
+				setTimeout((function () {
+					React.findDOMNode(this) && this.fixHorizontalScrollbar();
+				}).bind(this), 0);
 			}
-		},
+		}, {
+			key: 'fixHorizontalScrollbar',
+			value: function fixHorizontalScrollbar() {
+				var dom = React.findDOMNode(this).querySelector('.z-horizontal-scroller');
 
-		componentDidMount: function componentDidMount() {
-			this.fixHorizontalScrollbar();
+				if (dom) {
+					var height = dom.style.height;
 
-			setTimeout(this.fixHorizontalScrollbar, 0);
-		},
-
-		fixHorizontalScrollbar: function fixHorizontalScrollbar() {
-			var dom = React.findDOMNode(this.refs.horizontalScroller);
-
-			if (dom) {
-				var height = dom.style.height;
-
-				dom.style.height = height == '0.2px' ? '0.1px' : '0.2px';
+					dom.style.height = height == '0.2px' ? '0.1px' : '0.2px';
+				}
 			}
-		},
+		}, {
+			key: 'getVerticalScrollbarNode',
+			value: function getVerticalScrollbarNode() {
+				return React.findDOMNode(this).querySelector('.ref-verticalScrollbar');
+			}
+		}, {
+			key: 'getHorizontalScrollbarNode',
+			value: function getHorizontalScrollbarNode() {
+				return React.findDOMNode(this).querySelector('.ref-horizontalScrollbar');
+			}
+		}, {
+			key: 'renderVerticalScrollbar',
 
+			////////////////////////////////////////////////
+			//
+			// RENDER METHODS
+			//
+			////////////////////////////////////////////////
+			value: function renderVerticalScrollbar(props) {
+				var height = props.scrollHeight;
+				var verticalScrollbarStyle = {
+					width: props.scrollbarSize
+				};
+
+				var onScroll = this.onVerticalScroll;
+
+				return React.createElement(
+					'div',
+					{ className: 'z-vertical-scrollbar', style: verticalScrollbarStyle },
+					React.createElement(
+						'div',
+						{
+							xref: 'verticalScrollbar',
+							className: 'ref-verticalScrollbar',
+							onScroll: onScroll,
+							style: { overflow: 'auto', width: '100%', height: '100%' }
+						},
+						React.createElement('div', { className: 'z-vertical-scroller', style: { height: height } })
+					)
+				);
+			}
+		}, {
+			key: 'renderHorizontalScrollbar',
+			value: function renderHorizontalScrollbar(props) {
+				var scrollbar;
+				var onScroll = this.onHorizontalScroll;
+				var style = horizontalScrollbarStyle;
+				var minWidth = props.scrollWidth;
+
+				var scroller = React.createElement('div', { xref: 'horizontalScroller', className: 'z-horizontal-scroller', style: { width: minWidth } });
+
+				if (IS_MAC) {
+					//needed for mac safari
+					scrollbar = React.createElement(
+						'div',
+						{
+							style: style,
+							className: 'z-horizontal-scrollbar mac-fix'
+						},
+						React.createElement(
+							'div',
+							{
+								xref: 'horizontalScrollbar',
+								onScroll: onScroll,
+								className: 'ref-horizontalScrollbar z-horizontal-scrollbar-fix'
+							},
+							scroller
+						)
+					);
+				} else {
+					scrollbar = React.createElement(
+						'div',
+						{
+							style: style,
+							className: 'ref-horizontalScrollbar z-horizontal-scrollbar',
+							xref: 'horizontalScrollbar',
+							onScroll: onScroll
+						},
+						scroller
+					);
+				}
+
+				return scrollbar;
+			}
+		}, {
+			key: 'renderLoadMask',
+			value: function renderLoadMask(props) {
+				if (props.loadMask) {
+					var loadMaskProps = assign({ visible: props.loading }, props.loadMaskProps);
+
+					var defaultFactory = LoadMaskFactory;
+					var factory = typeof props.loadMask == 'function' ? props.loadMask : defaultFactory;
+
+					var mask = factory(loadMaskProps);
+
+					if (mask === undefined) {
+						//allow the specified factory to just modify props
+						//and then leave the rendering to the defaultFactory
+						mask = defaultFactory(loadMaskProps);
+					}
+
+					return mask;
+				}
+			}
+		}, {
+			key: 'prepareProps',
+
+			////////////////////////////////////////////////
+			//
+			// PREPARE PROPS METHODS
+			//
+			////////////////////////////////////////////////
+			value: function prepareProps(thisProps) {
+				var props = assign({}, thisProps);
+
+				props.className = this.prepareClassName(props);
+				props.style = this.prepareStyle(props);
+
+				return props;
+			}
+		}, {
+			key: 'prepareStyle',
+			value: function prepareStyle(props) {
+				var style = assign({}, props.style);
+
+				if (props.height != null) {
+					style.height = props.height;
+				}
+
+				if (props.width != null) {
+					style.width = props.width;
+				}
+
+				if (props.normalizeStyles) {
+					style = normalize(style);
+				}
+
+				return style;
+			}
+		}, {
+			key: 'prepareClassName',
+			value: function prepareClassName(props) {
+				var className = props.className || '';
+
+				if (Scroller.className) {
+					className += ' ' + Scroller.className;
+				}
+
+				return className;
+			}
+		}]);
+
+		return Scroller;
+	})(_Component3['default']);
+
+	Scroller.className = 'z-scroller';
+	Scroller.displayName = DISPLAY_NAME;
+
+	assign(Scroller.prototype, {
 		onVerticalScroll: onScroll('vertical'),
 		onHorizontalScroll: onScroll('horizontal'),
 
@@ -395,141 +537,50 @@ return /******/ (function(modules) { // webpackBootstrap
 		horizontalScrollAt: scrollAt('horizontal'),
 
 		syncHorizontalScrollbar: syncHorizontalScrollbar,
-		syncVerticalScrollbar: syncVerticalScrollbar,
-
-		////////////////////////////////////////////////
-		//
-		// RENDER METHODS
-		//
-		////////////////////////////////////////////////
-		renderVerticalScrollbar: function renderVerticalScrollbar(props) {
-			var height = props.scrollHeight;
-			var verticalScrollbarStyle = {
-				width: props.scrollbarSize
-			};
-
-			var onScroll = this.onVerticalScroll;
-
-			return React.createElement(
-				'div',
-				{ className: 'z-vertical-scrollbar', style: verticalScrollbarStyle },
-				React.createElement(
-					'div',
-					{
-						ref: 'verticalScrollbar',
-						onScroll: onScroll,
-						style: { overflow: 'auto', width: '100%', height: '100%' }
-					},
-					React.createElement('div', { className: 'z-vertical-scroller', style: { height: height } })
-				)
-			);
-		},
-
-		renderHorizontalScrollbar: function renderHorizontalScrollbar(props) {
-			var scrollbar;
-			var onScroll = this.onHorizontalScroll;
-			var style = horizontalScrollbarStyle;
-			var minWidth = props.scrollWidth;
-
-			var scroller = React.createElement('div', { ref: 'horizontalScroller', className: 'z-horizontal-scroller', style: { width: minWidth } });
-
-			if (IS_MAC) {
-				//needed for mac safari
-				scrollbar = React.createElement(
-					'div',
-					{
-						style: style,
-						className: 'z-horizontal-scrollbar mac-fix'
-					},
-					React.createElement(
-						'div',
-						{
-							ref: 'horizontalScrollbar',
-							onScroll: onScroll,
-							className: 'z-horizontal-scrollbar-fix'
-						},
-						scroller
-					)
-				);
-			} else {
-				scrollbar = React.createElement(
-					'div',
-					{
-						style: style,
-						className: 'z-horizontal-scrollbar',
-						ref: 'horizontalScrollbar',
-						onScroll: onScroll
-					},
-					scroller
-				);
-			}
-
-			return scrollbar;
-		},
-
-		renderLoadMask: function renderLoadMask(props) {
-			if (props.loadMask) {
-				var loadMaskProps = assign({ visible: props.loading }, props.loadMaskProps);
-
-				var defaultFactory = LoadMaskFactory;
-				var factory = typeof props.loadMask == 'function' ? props.loadMask : defaultFactory;
-
-				var mask = factory(loadMaskProps);
-
-				if (mask === undefined) {
-					//allow the specified factory to just modify props
-					//and then leave the rendering to the defaultFactory
-					mask = defaultFactory(loadMaskProps);
-				}
-
-				return mask;
-			}
-		},
-
-		////////////////////////////////////////////////
-		//
-		// PREPARE PROPS METHODS
-		//
-		////////////////////////////////////////////////
-		prepareProps: function prepareProps(thisProps) {
-			var props = assign({}, thisProps);
-
-			props.className = this.prepareClassName(props);
-			props.style = this.prepareStyle(props);
-
-			return props;
-		},
-
-		prepareStyle: function prepareStyle(props) {
-			var style = assign({}, props.style);
-
-			if (props.height != null) {
-				style.height = props.height;
-			}
-
-			if (props.width != null) {
-				style.width = props.width;
-			}
-
-			if (props.normalizeStyles) {
-				style = normalize(style);
-			}
-
-			return style;
-		},
-
-		prepareClassName: function prepareClassName(props) {
-			var className = props.className || '';
-
-			if (Scroller.className) {
-				className += ' ' + Scroller.className;
-			}
-
-			return className;
-		}
+		syncVerticalScrollbar: syncVerticalScrollbar
 	});
 
-	Scroller.className = 'z-scroller';
+	Scroller.propTypes = {
+		loadMask: PT.oneOfType([PT.bool, PT.func]),
+
+		loading: PT.bool,
+		normalizeStyles: PT.bool,
+
+		scrollTop: PT.number,
+		scrollLeft: PT.number,
+
+		scrollWidth: PT.number.isRequired,
+		scrollHeight: PT.number.isRequired,
+
+		height: PT.number,
+		width: PT.number,
+
+		minScrollStep: PT.number,
+		minHorizontalScrollStep: PT.number,
+		minVerticalScrollStep: PT.number,
+
+		virtualRendering: PT.oneOf([true]),
+
+		preventDefaultVertical: PT.bool,
+		preventDefaultHorizontal: PT.bool
+	}, Scroller.defaultProps = {
+		'data-display-name': DISPLAY_NAME,
+		loadMask: true,
+
+		virtualRendering: true, //FOR NOW, only true is supported
+		scrollbarSize: 20,
+
+		scrollTop: 0,
+		scrollLeft: 0,
+
+		minScrollStep: 10,
+
+		minHorizontalScrollStep: IS_FIREFOX ? 40 : 1,
+
+		//since FF goes back in browser history on scroll too soon
+		//chrome and others also do this, but the normal preventDefault in syncScrollbar fn prevents this
+		preventDefaultHorizontal: IS_FIREFOX
+	};
 
 	exports['default'] = Scroller;
 	module.exports = exports['default'];
@@ -551,177 +602,19 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	function ToObject(val) {
-		if (val == null) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var keys;
-		var to = ToObject(target);
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = arguments[s];
-			keys = Object.keys(Object(from));
-
-			for (var i = 0; i < keys.length; i++) {
-				to[keys[i]] = from[keys[i]];
-			}
-		}
-
-		return to;
-	};
-
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = 'ontouchstart' in global || (global.DocumentTouch && document instanceof DocumentTouch)
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = 'ontouchstart' in global || (global.DocumentTouch && document instanceof DocumentTouch)
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
 	'use strict';
 
-	var hasOwn      = __webpack_require__(7)
-	var getPrefixed = __webpack_require__(8)
-
-	var map      = __webpack_require__(9)
-	var plugable = __webpack_require__(10)
-
-	function plugins(key, value){
-
-		var result = {
-			key  : key,
-			value: value
-		}
-
-		;(RESULT.plugins || []).forEach(function(fn){
-
-			var tmp = map(function(res){
-				return fn(key, value, res)
-			}, result)
-
-			if (tmp){
-				result = tmp
-			}
-		})
-
-		return result
-	}
-
-	function normalize(key, value){
-
-		var result = plugins(key, value)
-
-		return map(function(result){
-			return {
-				key  : getPrefixed(result.key, result.value),
-				value: result.value
-			}
-		}, result)
-
-		return result
-	}
-
-	var RESULT = function(style){
-
-		var k
-		var item
-		var result = {}
-
-		for (k in style) if (hasOwn(style, k)){
-			item = normalize(k, style[k])
-
-			if (!item){
-				continue
-			}
-
-			map(function(item){
-				result[item.key] = item.value
-			}, item)
-		}
-
-		return result
-	}
-
-	module.exports = plugable(RESULT)
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict'
-
-	var React  = __webpack_require__(1)
-	var assign = __webpack_require__(2)
-	var Loader = __webpack_require__(11)
-
-	module.exports = React.createClass({
-
-	    displayName: 'LoadMask',
-
-	    getDefaultProps: function(){
-
-	        return {
-	            visible: false,
-	            visibleDisplayValue: 'block',
-	            defaultStyle: {
-	                background: 'rgba(128, 128, 128, 0.5)',
-	                position: 'absolute',
-	                width   : '100%',
-	                height  : '100%',
-	                display : 'none',
-	                top: 0,
-	                left: 0
-	            }
-	        }
-	    },
-
-	    render: function(){
-	        var props = assign({}, this.props)
-
-	        props.style = this.prepareStyle(props)
-
-	        props.className = props.className || ''
-	        props.className += ' loadmask'
-
-	        return React.createElement("div", React.__spread({},  props), 
-	            React.createElement(Loader, {size: props.size})
-	        )
-	    },
-
-	    prepareStyle: function(props){
-
-	        var style = assign({}, props.defaultStyle, props.style)
-
-	        style.display = props.visible?
-	                        props.visibleDisplayValue:
-	                        'none'
-
-	        return style
-	    }
-	})
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var assign = __webpack_require__(2)
+	var assign = __webpack_require__(4)
 	var Region = __webpack_require__(14)
-	var hasTouch = __webpack_require__(3)
-	var once   = __webpack_require__(12)
+	var hasTouch = __webpack_require__(2)
+	var once   = __webpack_require__(8)
 
 	var Helper = function(config){
 	    this.config = config
@@ -914,32 +807,267 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var keys;
+		var to = ToObject(target);
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = Object.keys(Object(from));
+
+			for (var i = 0; i < keys.length; i++) {
+				to[keys[i]] = from[keys[i]];
+			}
+		}
+
+		return to;
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict'
+
+	var React  = __webpack_require__(1)
+	var assign = __webpack_require__(4)
+	var Loader = __webpack_require__(9)
+
+	module.exports = React.createClass({
+
+	    displayName: 'LoadMask',
+
+	    getDefaultProps: function(){
+
+	        return {
+	            visible: false,
+	            visibleDisplayValue: 'block',
+	            defaultStyle: {
+	                background: 'rgba(128, 128, 128, 0.5)',
+	                position: 'absolute',
+	                width   : '100%',
+	                height  : '100%',
+	                display : 'none',
+	                top: 0,
+	                left: 0
+	            }
+	        }
+	    },
+
+	    render: function(){
+	        var props = assign({}, this.props)
+
+	        props.style = this.prepareStyle(props)
+
+	        props.className = props.className || ''
+	        props.className += ' loadmask'
+
+	        return React.createElement("div", React.__spread({},  props), 
+	            React.createElement(Loader, {size: props.size})
+	        )
+	    },
+
+	    prepareStyle: function(props){
+
+	        var style = assign({}, props.defaultStyle, props.style)
+
+	        style.display = props.visible?
+	                        props.visibleDisplayValue:
+	                        'none'
+
+	        return style
+	    }
+	})
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var hasOwn      = __webpack_require__(10)
+	var getPrefixed = __webpack_require__(11)
+
+	var map      = __webpack_require__(12)
+	var plugable = __webpack_require__(13)
+
+	function plugins(key, value){
+
+		var result = {
+			key  : key,
+			value: value
+		}
+
+		;(RESULT.plugins || []).forEach(function(fn){
+
+			var tmp = map(function(res){
+				return fn(key, value, res)
+			}, result)
+
+			if (tmp){
+				result = tmp
+			}
+		})
+
+		return result
+	}
+
+	function normalize(key, value){
+
+		var result = plugins(key, value)
+
+		return map(function(result){
+			return {
+				key  : getPrefixed(result.key, result.value),
+				value: result.value
+			}
+		}, result)
+
+		return result
+	}
+
+	var RESULT = function(style){
+
+		var k
+		var item
+		var result = {}
+
+		for (k in style) if (hasOwn(style, k)){
+			item = normalize(k, style[k])
+
+			if (!item){
+				continue
+			}
+
+			map(function(item){
+				result[item.key] = item.value
+			}, item)
+		}
+
+		return result
+	}
+
+	module.exports = plugable(RESULT)
+
+/***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = function(obj, prop){
-		return Object.prototype.hasOwnProperty.call(obj, prop)
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var React = __webpack_require__(1);
+	var assign = __webpack_require__(15);
+
+	function autoBind(object) {
+	  var proto = object.constructor.prototype;
+
+	  var names = Object.getOwnPropertyNames(proto).filter(function (key) {
+	    return key != 'constructor' && key != 'render' && typeof proto[key] == 'function';
+	  });
+
+	  names.push('setState');
+	  names.forEach(function (key) {
+	    object[key] = object[key].bind(object);
+	  });
+
+	  return object;
 	}
 
+	var ReactClass = (function (_React$Component) {
+	  function ReactClass(props) {
+	    _classCallCheck(this, ReactClass);
+
+	    _get(Object.getPrototypeOf(ReactClass.prototype), 'constructor', this).call(this, props);
+	    autoBind(this);
+	  }
+
+	  _inherits(ReactClass, _React$Component);
+
+	  _createClass(ReactClass, [{
+	    key: 'prepareProps',
+	    value: function prepareProps(thisProps) {
+
+	      var props = assign({}, thisProps);
+
+	      props.style = this.prepareStyle(props);
+	      props.className = this.prepareClassName(props);
+
+	      return props;
+	    }
+	  }, {
+	    key: 'prepareClassName',
+	    value: function prepareClassName(props) {
+	      var className = props.className || '';
+
+	      var defaultProps = this.constructor.defaultProps;
+
+	      if (defaultProps.defaultClassName != null) {
+	        className += ' ' + defaultProps.defaultClassName;
+	      }
+
+	      return className;
+	    }
+	  }, {
+	    key: 'prepareStyle',
+	    value: function prepareStyle(props) {
+	      var defaultStyle;
+
+	      if (this.constructor.defaultProps) {
+	        defaultStyle = this.constructor.defaultProps.defaultStyle;
+	      }
+
+	      return assign({}, defaultStyle, props.style);
+	    }
+	  }]);
+
+	  return ReactClass;
+	})(React.Component);
+
+	module.exports = ReactClass;
 
 /***/ },
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	'use once'
 
-	var getStylePrefixed = __webpack_require__(15)
-	var properties       = __webpack_require__(16)
+	module.exports = function once(fn, scope){
 
-	module.exports = function(key, value){
+	    var called
+	    var result
 
-		if (!properties[key]){
-			return key
-		}
+	    return function(){
+	        if (called){
+	            return result
+	        }
 
-		return getStylePrefixed(key, value)
+	        called = true
+
+	        return result = fn.apply(scope || this, arguments)
+	    }
 	}
 
 /***/ },
@@ -948,65 +1076,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	module.exports = function(fn, item){
-
-		if (!item){
-			return
-		}
-
-		if (Array.isArray(item)){
-			return item.map(fn).filter(function(x){
-				return !!x
-			})
-		} else {
-			return fn(item)
-		}
-	}
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var getCssPrefixedValue = __webpack_require__(13)
-
-	module.exports = function(target){
-		target.plugins = target.plugins || [
-			(function(){
-				var values = {
-					'flex':1,
-					'inline-flex':1
-				}
-
-				return function(key, value){
-					if (key === 'display' && value in values){
-						return {
-							key  : key,
-							value: getCssPrefixedValue(key, value, true)
-						}
-					}
-				}
-			})()
-		]
-
-		target.plugin = function(fn){
-			target.plugins = target.plugins || []
-
-			target.plugins.push(fn)
-		}
-
-		return target
-	}
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
 	var React  = __webpack_require__(1)
-	var assign = __webpack_require__(2)
+	var assign = __webpack_require__(4)
 
 	module.exports = React.createClass({
 
@@ -1066,25 +1137,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	})
 
 /***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	module.exports = function(obj, prop){
+		return Object.prototype.hasOwnProperty.call(obj, prop)
+	}
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var getStylePrefixed = __webpack_require__(16)
+	var properties       = __webpack_require__(17)
+
+	module.exports = function(key, value){
+
+		if (!properties[key]){
+			return key
+		}
+
+		return getStylePrefixed(key, value)
+	}
+
+/***/ },
 /* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use once'
+	'use strict';
 
-	module.exports = function once(fn, scope){
+	module.exports = function(fn, item){
 
-	    var called
-	    var result
+		if (!item){
+			return
+		}
 
-	    return function(){
-	        if (called){
-	            return result
-	        }
-
-	        called = true
-
-	        return result = fn.apply(scope || this, arguments)
-	    }
+		if (Array.isArray(item)){
+			return item.map(fn).filter(function(x){
+				return !!x
+			})
+		} else {
+			return fn(item)
+		}
 	}
 
 /***/ },
@@ -1093,52 +1192,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var getPrefix     = __webpack_require__(21)
-	var forcePrefixed = __webpack_require__(24)
-	var el            = __webpack_require__(22)
+	var getCssPrefixedValue = __webpack_require__(18)
 
-	var MEMORY = {}
-	var STYLE
-	var ELEMENT
+	module.exports = function(target){
+		target.plugins = target.plugins || [
+			(function(){
+				var values = {
+					'flex':1,
+					'inline-flex':1
+				}
 
-	module.exports = function(key, value, force){
+				return function(key, value){
+					if (key === 'display' && value in values){
+						return {
+							key  : key,
+							value: getCssPrefixedValue(key, value, true)
+						}
+					}
+				}
+			})()
+		]
 
-	    ELEMENT = ELEMENT || el()
-	    STYLE   = STYLE   ||  ELEMENT.style
+		target.plugin = function(fn){
+			target.plugins = target.plugins || []
 
-	    var k = key + ': ' + value
+			target.plugins.push(fn)
+		}
 
-	    if (MEMORY[k]){
-	        return MEMORY[k]
-	    }
-
-	    var prefix
-	    var prefixed
-	    var prefixedValue
-
-	    if (force || !(key in STYLE)){
-
-	        prefix = getPrefix('appearance')
-
-	        if (prefix){
-	            prefixed = forcePrefixed(key, value)
-
-	            prefixedValue = '-' + prefix.toLowerCase() + '-' + value
-
-	            if (prefixed in STYLE){
-	                ELEMENT.style[prefixed] = ''
-	                ELEMENT.style[prefixed] = prefixedValue
-
-	                if (ELEMENT.style[prefixed] !== ''){
-	                    value = prefixedValue
-	                }
-	            }
-	        }
-	    }
-
-	    MEMORY[k] = value
-
-	    return value
+		return target
 	}
 
 /***/ },
@@ -1147,12 +1228,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(26)
 
-	__webpack_require__(17)
-	__webpack_require__(18)
+	__webpack_require__(19)
+	__webpack_require__(20)
 
-	var COMPUTE_ALIGN_REGION = __webpack_require__(19)
+	var COMPUTE_ALIGN_REGION = __webpack_require__(21)
 
 	/**
 	 * region-align module exposes methods for aligning {@link Element} and {@link Region} instances
@@ -1332,10 +1413,55 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
-	var toUpperFirst = __webpack_require__(20)
-	var getPrefix    = __webpack_require__(21)
-	var el           = __webpack_require__(22)
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	function ownEnumerableKeys(obj) {
+		var keys = Object.getOwnPropertyNames(obj);
+
+		if (Object.getOwnPropertySymbols) {
+			keys = keys.concat(Object.getOwnPropertySymbols(obj));
+		}
+
+		return keys.filter(function (key) {
+			return propIsEnumerable.call(obj, key);
+		});
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var keys;
+		var to = ToObject(target);
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = ownEnumerableKeys(Object(from));
+
+			for (var i = 0; i < keys.length; i++) {
+				to[keys[i]] = from[keys[i]];
+			}
+		}
+
+		return to;
+	};
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var toUpperFirst = __webpack_require__(22)
+	var getPrefix    = __webpack_require__(23)
+	var el           = __webpack_require__(24)
 
 	var MEMORY = {}
 	var STYLE
@@ -1384,7 +1510,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1425,12 +1551,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 17 */
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var getPrefix     = __webpack_require__(23)
+	var forcePrefixed = __webpack_require__(25)
+	var el            = __webpack_require__(24)
+
+	var MEMORY = {}
+	var STYLE
+	var ELEMENT
+
+	module.exports = function(key, value, force){
+
+	    ELEMENT = ELEMENT || el()
+	    STYLE   = STYLE   ||  ELEMENT.style
+
+	    var k = key + ': ' + value
+
+	    if (MEMORY[k]){
+	        return MEMORY[k]
+	    }
+
+	    var prefix
+	    var prefixed
+	    var prefixedValue
+
+	    if (force || !(key in STYLE)){
+
+	        prefix = getPrefix('appearance')
+
+	        if (prefix){
+	            prefixed = forcePrefixed(key, value)
+
+	            prefixedValue = '-' + prefix.toLowerCase() + '-' + value
+
+	            if (prefixed in STYLE){
+	                ELEMENT.style[prefixed] = ''
+	                ELEMENT.style[prefixed] = prefixedValue
+
+	                if (ELEMENT.style[prefixed] !== ''){
+	                    value = prefixedValue
+	                }
+	            }
+	        }
+	    }
+
+	    MEMORY[k] = value
+
+	    return value
+	}
+
+/***/ },
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(26)
 
 	/**
 	 * @static
@@ -1546,12 +1726,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(26)
 
 	/**
 	 *
@@ -1588,14 +1768,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
-	var ALIGN_TO_NORMALIZED = __webpack_require__(25)
+	var ALIGN_TO_NORMALIZED = __webpack_require__(27)
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(26)
 
 	/**
 	 * @localdoc Given source and target regions, and the given alignments required, returns a region that is the resulting allignment.
@@ -1669,7 +1849,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = COMPUTE_ALIGN_REGION
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1681,15 +1861,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(20)
+	var toUpperFirst = __webpack_require__(22)
 	var prefixes     = ["ms", "Moz", "Webkit", "O"]
 
-	var el = __webpack_require__(22)
+	var el = __webpack_require__(24)
 
 	var ELEMENT
 	var PREFIX
@@ -1720,7 +1900,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -1742,20 +1922,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(26)
-
-/***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(20)
-	var getPrefix    = __webpack_require__(21)
-	var properties   = __webpack_require__(16)
+	var toUpperFirst = __webpack_require__(22)
+	var getPrefix    = __webpack_require__(23)
+	var properties   = __webpack_require__(17)
 
 	/**
 	 * Returns the given key prefixed, if the property is found in the prefixProps map.
@@ -1777,12 +1951,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(28)
+
+/***/ },
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
-	var Region = __webpack_require__(23)
+	var Region = __webpack_require__(26)
 
 	/**
 	 *
@@ -1959,19 +2139,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ALIGN_TO_NORMALIZED
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hasOwn    = __webpack_require__(31)
-	var newify    = __webpack_require__(32)
+	var hasOwn    = __webpack_require__(33)
+	var newify    = __webpack_require__(34)
 
-	var assign      = __webpack_require__(2);
-	var EventEmitter = __webpack_require__(30).EventEmitter
+	var assign      = __webpack_require__(4);
+	var EventEmitter = __webpack_require__(32).EventEmitter
 
-	var inherits = __webpack_require__(27)
-	var VALIDATE = __webpack_require__(28)
+	var inherits = __webpack_require__(29)
+	var VALIDATE = __webpack_require__(30)
 
 	var objectToString = Object.prototype.toString
 
@@ -3010,12 +3190,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	})
 
-	__webpack_require__(29)(REGION)
+	__webpack_require__(31)(REGION)
 
 	module.exports = REGION
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3033,7 +3213,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3065,13 +3245,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hasOwn   = __webpack_require__(31)
-	var VALIDATE = __webpack_require__(28)
+	var hasOwn   = __webpack_require__(33)
+	var VALIDATE = __webpack_require__(30)
 
 	module.exports = function(REGION){
 
@@ -3284,7 +3464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -3591,7 +3771,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -3634,17 +3814,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	})
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getInstantiatorFunction = __webpack_require__(33)
+	var getInstantiatorFunction = __webpack_require__(35)
 
 	module.exports = function(fn, args){
 		return getInstantiatorFunction(args.length)(fn, args)
 	}
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function(){

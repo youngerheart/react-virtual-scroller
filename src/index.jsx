@@ -1,5 +1,7 @@
 'use strict'
 
+import Component from 'react-class'
+
 const React      = require('react')
 const LoadMask   = require('react-load-mask')
 const assign     = require('object-assign')
@@ -49,7 +51,7 @@ const syncScrollbar = function(orientation) {
 
 	return function(scrollPos, event){
 
-		var domNode       = React.findDOMNode(this.refs[refNames[orientation]])
+		var domNode       = orientation == 'horizontal'? this.getHorizontalScrollbarNode(): this.getVerticalScrollbarNode()
 		var scrollPosName = orientation == 'horizontal'? 'scrollLeft': 'scrollTop'
 		var overflowCallback
 
@@ -135,60 +137,9 @@ const onScroll = function(orientation){
  * <Scroller loading={true} loadMask={mask}
  *
  */
-const Scroller = React.createClass({
+class Scroller extends Component {
 
-	displayName: DISPLAY_NAME,
-
-	propTypes: {
-		loadMask: PT.oneOfType([
-			PT.bool,
-			PT.func
-		]),
-
-		loading : PT.bool,
-		normalizeStyles: PT.bool,
-
-		scrollTop : PT.number,
-		scrollLeft: PT.number,
-
-		scrollWidth : PT.number.isRequired,
-		scrollHeight: PT.number.isRequired,
-
-		height: PT.number,
-		width : PT.number,
-
-		minScrollStep          : PT.number,
-		minHorizontalScrollStep: PT.number,
-		minVerticalScrollStep  : PT.number,
-
-		virtualRendering: PT.oneOf([true]),
-
-		preventDefaultVertical: PT.bool,
-		preventDefaultHorizontal: PT.bool
-	},
-
-	getDefaultProps: function(){
-		return {
-			'data-display-name': DISPLAY_NAME,
-			loadMask: true,
-
-			virtualRendering: true, //FOR NOW, only true is supported
-			scrollbarSize: 20,
-
-			scrollTop : 0,
-			scrollLeft: 0,
-
-			minScrollStep: 10,
-
-			minHorizontalScrollStep: IS_FIREFOX? 40: 1,
-
-			//since FF goes back in browser history on scroll too soon
-			//chrome and others also do this, but the normal preventDefault in syncScrollbar fn prevents this
-			preventDefaultHorizontal: IS_FIREFOX
-		}
-	},
-
-	render: function(){
+	render(){
 		var props = this.p = this.prepareProps(this.props)
 
 		var loadMask            = this.renderLoadMask(props)
@@ -221,18 +172,18 @@ const Scroller = React.createClass({
 
 			{horizontalScrollbar}
 		</div>
-	},
+	}
 
-	prepareRenderProps: function(props) {
+	prepareRenderProps(props) {
 		var renderProps = assign({}, props)
 
 		delete renderProps.height
 		delete renderProps.width
 
 		return renderProps
-	},
+	}
 
-	handleTouchStart: function(event) {
+	handleTouchStart(event) {
 
 		var props  = this.props
 		var scroll = {
@@ -269,9 +220,9 @@ const Scroller = React.createClass({
 
 	    event.stopPropagation()
 	    preventDefault(event)
-	},
+	}
 
-	handleWheel: function(event){
+	handleWheel(event){
 
 		var props           = this.props
 		// var normalizedEvent = normalizeWheel(event)
@@ -314,39 +265,42 @@ const Scroller = React.createClass({
 
 		    props.preventDefaultVertical && preventDefault(event)
 		}
-	},
+	}
 
-	componentDidMount: function() {
+	componentDidMount() {
 		this.fixHorizontalScrollbar()
 
-		setTimeout(this.fixHorizontalScrollbar, 0)
-	},
+		;(this.props.onMount || emptyFn)(this);
 
-	fixHorizontalScrollbar: function() {
-		var dom = React.findDOMNode(this.refs.horizontalScroller)
+		setTimeout(function(){
+			React.findDOMNode(this) && this.fixHorizontalScrollbar();
+		}.bind(this), 0)
+	}
+
+	fixHorizontalScrollbar() {
+		var dom = React.findDOMNode(this).querySelector('.z-horizontal-scroller')
 
 		if (dom){
 			var height = dom.style.height
 
 			dom.style.height = height == '0.2px'? '0.1px': '0.2px'
 		}
-	},
+	}
 
-	onVerticalScroll: onScroll('vertical'),
-	onHorizontalScroll: onScroll('horizontal'),
+	getVerticalScrollbarNode(){
+		return React.findDOMNode(this).querySelector('.ref-verticalScrollbar')
+	}
 
-	verticalScrollAt  : scrollAt('vertical'),
-	horizontalScrollAt: scrollAt('horizontal'),
-
-	syncHorizontalScrollbar: syncHorizontalScrollbar,
-	syncVerticalScrollbar  : syncVerticalScrollbar,
+	getHorizontalScrollbarNode(){
+		return React.findDOMNode(this).querySelector('.ref-horizontalScrollbar')
+	}
 
 	////////////////////////////////////////////////
 	//
 	// RENDER METHODS
 	//
 	////////////////////////////////////////////////
-	renderVerticalScrollbar: function(props) {
+	renderVerticalScrollbar(props) {
 		var height = props.scrollHeight
 		var verticalScrollbarStyle = {
 			width: props.scrollbarSize
@@ -356,22 +310,23 @@ const Scroller = React.createClass({
 
 		return <div className="z-vertical-scrollbar" style={verticalScrollbarStyle}>
 		    <div
-		    	ref="verticalScrollbar"
+		    	xref="verticalScrollbar"
+		    	className="ref-verticalScrollbar"
 		    	onScroll={onScroll}
 		    	style={{overflow: 'auto', width: '100%', height: '100%'}}
 		    >
 		        <div className="z-vertical-scroller" style={{height: height}} />
 		    </div>
 		</div>
-	},
+	}
 
-	renderHorizontalScrollbar: function(props) {
+	renderHorizontalScrollbar(props) {
 		var scrollbar
 		var onScroll = this.onHorizontalScroll
 		var style    = horizontalScrollbarStyle
 		var minWidth = props.scrollWidth
 
-		var scroller = <div ref="horizontalScroller" className="z-horizontal-scroller" style={{width: minWidth}} />
+		var scroller = <div xref="horizontalScroller" className="z-horizontal-scroller" style={{width: minWidth}} />
 
 		if (IS_MAC){
 		    //needed for mac safari
@@ -380,9 +335,9 @@ const Scroller = React.createClass({
 		    			className="z-horizontal-scrollbar mac-fix"
 		    		>
 				        <div
-				        	ref="horizontalScrollbar"
+				        	xref="horizontalScrollbar"
 				        	onScroll={onScroll}
-				        	className="z-horizontal-scrollbar-fix"
+				        	className="ref-horizontalScrollbar z-horizontal-scrollbar-fix"
 				        >
 				            {scroller}
 				        </div>
@@ -390,8 +345,8 @@ const Scroller = React.createClass({
 		} else {
 		    scrollbar = <div
 		    		style={style}
-		    		className="z-horizontal-scrollbar"
-		    		ref="horizontalScrollbar"
+		    		className="ref-horizontalScrollbar z-horizontal-scrollbar"
+		    		xref="horizontalScrollbar"
 		    		onScroll={onScroll}
 		    	>
 		        {scroller}
@@ -399,9 +354,9 @@ const Scroller = React.createClass({
 		}
 
 		return scrollbar
-	},
+	}
 
-	renderLoadMask: function(props) {
+	renderLoadMask(props) {
 		if (props.loadMask){
 			var loadMaskProps = assign({ visible: props.loading }, props.loadMaskProps)
 
@@ -420,23 +375,23 @@ const Scroller = React.createClass({
 
 			return mask
 		}
-	},
+	}
 
 	////////////////////////////////////////////////
 	//
 	// PREPARE PROPS METHODS
 	//
 	////////////////////////////////////////////////
-	prepareProps: function(thisProps) {
+	prepareProps(thisProps) {
 		const props = assign({}, thisProps)
 
 		props.className = this.prepareClassName(props)
 		props.style     = this.prepareStyle(props)
 
 		return props
-	},
+	}
 
-	prepareStyle: function(props) {
+	prepareStyle(props) {
 		let style = assign({}, props.style)
 
 		if (props.height != null){
@@ -452,9 +407,9 @@ const Scroller = React.createClass({
 		}
 
 		return style
-	},
+	}
 
-	prepareClassName: function(props) {
+	prepareClassName(props) {
 		let className = props.className || ''
 
 		if (Scroller.className){
@@ -463,8 +418,67 @@ const Scroller = React.createClass({
 
 		return className
 	}
-})
+}
 
 Scroller.className = 'z-scroller'
+Scroller.displayName = DISPLAY_NAME
+
+assign(Scroller.prototype, {
+	onVerticalScroll: onScroll('vertical'),
+	onHorizontalScroll: onScroll('horizontal'),
+
+	verticalScrollAt  : scrollAt('vertical'),
+	horizontalScrollAt: scrollAt('horizontal'),
+
+	syncHorizontalScrollbar: syncHorizontalScrollbar,
+	syncVerticalScrollbar  : syncVerticalScrollbar
+})
+
+Scroller.propTypes = {
+	loadMask: PT.oneOfType([
+		PT.bool,
+		PT.func
+	]),
+
+	loading : PT.bool,
+	normalizeStyles: PT.bool,
+
+	scrollTop : PT.number,
+	scrollLeft: PT.number,
+
+	scrollWidth : PT.number.isRequired,
+	scrollHeight: PT.number.isRequired,
+
+	height: PT.number,
+	width : PT.number,
+
+	minScrollStep          : PT.number,
+	minHorizontalScrollStep: PT.number,
+	minVerticalScrollStep  : PT.number,
+
+	virtualRendering: PT.oneOf([true]),
+
+	preventDefaultVertical: PT.bool,
+	preventDefaultHorizontal: PT.bool
+},
+
+Scroller.defaultProps = {
+	'data-display-name': DISPLAY_NAME,
+	loadMask: true,
+
+	virtualRendering: true, //FOR NOW, only true is supported
+	scrollbarSize: 20,
+
+	scrollTop : 0,
+	scrollLeft: 0,
+
+	minScrollStep: 10,
+
+	minHorizontalScrollStep: IS_FIREFOX? 40: 1,
+
+	//since FF goes back in browser history on scroll too soon
+	//chrome and others also do this, but the normal preventDefault in syncScrollbar fn prevents this
+	preventDefaultHorizontal: IS_FIREFOX
+}
 
 export default Scroller

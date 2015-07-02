@@ -50,6 +50,7 @@
     "drag-helper": "^1.2.3",
     "has-touch": "^1.0.1",
     "object-assign": "^2.0.0",
+    "react-class": "^1.1.2",
     "react-load-mask": "^1.0.1",
     "react-style-normalizer": "^1.2.7",
     "stylus-normalizer": "^1.0.1"
