@@ -349,9 +349,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}, {
 			key: 'componentWillReceiveProps',
 			value: function componentWillReceiveProps() {
-				setTimeout((function () {
-					React.findDOMNode(this) && this.fixHorizontalScrollbar();
-				}).bind(this), 0);
+				setTimeout(this.fixHorizontalScrollbar, 0);
 			}
 		}, {
 			key: 'componentDidMount',
@@ -359,13 +357,15 @@ return /******/ (function(modules) { // webpackBootstrap
 				this.fixHorizontalScrollbar();(this.props.onMount || emptyFn)(this);
 
 				setTimeout((function () {
-					React.findDOMNode(this) && this.fixHorizontalScrollbar();
+					this.fixHorizontalScrollbar();
 				}).bind(this), 0);
 			}
 		}, {
 			key: 'fixHorizontalScrollbar',
 			value: function fixHorizontalScrollbar() {
-				var dom = React.findDOMNode(this).querySelector('.z-horizontal-scroller');
+				this.horizontalScrollerNode = this.horizontalScrollerNode || React.findDOMNode(this).querySelector('.z-horizontal-scroller');
+
+				var dom = this.horizontalScrollerNode;
 
 				if (dom) {
 					var height = dom.style.height;
@@ -376,12 +376,19 @@ return /******/ (function(modules) { // webpackBootstrap
 		}, {
 			key: 'getVerticalScrollbarNode',
 			value: function getVerticalScrollbarNode() {
-				return React.findDOMNode(this).querySelector('.ref-verticalScrollbar');
+				return this.verticalScrollbarNode = this.verticalScrollbarNode || React.findDOMNode(this).querySelector('.ref-verticalScrollbar');
 			}
 		}, {
 			key: 'getHorizontalScrollbarNode',
 			value: function getHorizontalScrollbarNode() {
-				return React.findDOMNode(this).querySelector('.ref-horizontalScrollbar');
+				return this.horizontalScrollbarNode = this.horizontalScrollbarNode || React.findDOMNode(this).querySelector('.ref-horizontalScrollbar');
+			}
+		}, {
+			key: 'componentWillUnmount',
+			value: function componentWillUnmount() {
+				delete this.horizontalScrollerNode;
+				delete this.horizontalScrollbarNode;
+				delete this.verticalScrollbarNode;
 			}
 		}, {
 			key: 'renderVerticalScrollbar',
@@ -405,7 +412,6 @@ return /******/ (function(modules) { // webpackBootstrap
 					React.createElement(
 						'div',
 						{
-							xref: 'verticalScrollbar',
 							className: 'ref-verticalScrollbar',
 							onScroll: onScroll,
 							style: { overflow: 'auto', width: '100%', height: '100%' }
@@ -435,7 +441,6 @@ return /******/ (function(modules) { // webpackBootstrap
 						React.createElement(
 							'div',
 							{
-								xref: 'horizontalScrollbar',
 								onScroll: onScroll,
 								className: 'ref-horizontalScrollbar z-horizontal-scrollbar-fix'
 							},
@@ -448,7 +453,6 @@ return /******/ (function(modules) { // webpackBootstrap
 						{
 							style: style,
 							className: 'ref-horizontalScrollbar z-horizontal-scrollbar',
-							xref: 'horizontalScrollbar',
 							onScroll: onScroll
 						},
 						scroller

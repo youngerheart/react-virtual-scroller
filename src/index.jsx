@@ -263,9 +263,7 @@ class Scroller extends Component {
 	}
 
 	componentWillReceiveProps(){
-		setTimeout(function(){
-			React.findDOMNode(this) && this.fixHorizontalScrollbar();
-		}.bind(this), 0)
+		setTimeout(this.fixHorizontalScrollbar, 0)
 	}
 
 	componentDidMount() {
@@ -274,12 +272,14 @@ class Scroller extends Component {
 		;(this.props.onMount || emptyFn)(this);
 
 		setTimeout(function(){
-			React.findDOMNode(this) && this.fixHorizontalScrollbar();
+			this.fixHorizontalScrollbar();
 		}.bind(this), 0)
 	}
 
 	fixHorizontalScrollbar() {
-		var dom = React.findDOMNode(this).querySelector('.z-horizontal-scroller')
+		this.horizontalScrollerNode = this.horizontalScrollerNode || React.findDOMNode(this).querySelector('.z-horizontal-scroller')
+
+		var dom = this.horizontalScrollerNode
 
 		if (dom){
 			var height = dom.style.height
@@ -289,11 +289,17 @@ class Scroller extends Component {
 	}
 
 	getVerticalScrollbarNode(){
-		return React.findDOMNode(this).querySelector('.ref-verticalScrollbar')
+		return this.verticalScrollbarNode = this.verticalScrollbarNode || React.findDOMNode(this).querySelector('.ref-verticalScrollbar')
 	}
 
 	getHorizontalScrollbarNode(){
-		return React.findDOMNode(this).querySelector('.ref-horizontalScrollbar')
+		return this.horizontalScrollbarNode = this.horizontalScrollbarNode || React.findDOMNode(this).querySelector('.ref-horizontalScrollbar')
+	}
+
+	componentWillUnmount(){
+		delete this.horizontalScrollerNode
+		delete this.horizontalScrollbarNode
+		delete this.verticalScrollbarNode
 	}
 
 	////////////////////////////////////////////////
@@ -311,7 +317,6 @@ class Scroller extends Component {
 
 		return <div className="z-vertical-scrollbar" style={verticalScrollbarStyle}>
 		    <div
-		    	xref="verticalScrollbar"
 		    	className="ref-verticalScrollbar"
 		    	onScroll={onScroll}
 		    	style={{overflow: 'auto', width: '100%', height: '100%'}}
@@ -336,7 +341,6 @@ class Scroller extends Component {
 		    			className="z-horizontal-scrollbar mac-fix"
 		    		>
 				        <div
-				        	xref="horizontalScrollbar"
 				        	onScroll={onScroll}
 				        	className="ref-horizontalScrollbar z-horizontal-scrollbar-fix"
 				        >
@@ -347,7 +351,6 @@ class Scroller extends Component {
 		    scrollbar = <div
 		    		style={style}
 		    		className="ref-horizontalScrollbar z-horizontal-scrollbar"
-		    		xref="horizontalScrollbar"
 		    		onScroll={onScroll}
 		    	>
 		        {scroller}
