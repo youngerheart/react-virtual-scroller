@@ -44,11 +44,6 @@ const ON_SCROLL_NAMES = {
  */
 const syncScrollbar = function(orientation) {
 
-	var refNames = {
-		vertical  : 'verticalScrollbar',
-		horizontal: 'horizontalScrollbar'
-	}
-
 	return function(scrollPos, event){
 
 		var domNode       = orientation == 'horizontal'? this.getHorizontalScrollbarNode(): this.getVerticalScrollbarNode()
@@ -265,6 +260,12 @@ class Scroller extends Component {
 
 		    props.preventDefaultVertical && preventDefault(event)
 		}
+	}
+
+	componentWillReceiveProps(){
+		setTimeout(function(){
+			React.findDOMNode(this) && this.fixHorizontalScrollbar();
+		}.bind(this), 0)
 	}
 
 	componentDidMount() {

@@ -70,18 +70,18 @@ return /******/ (function(modules) { // webpackBootstrap
 		value: true
 	});
 
-	var _Component2 = __webpack_require__(7);
+	var _Component2 = __webpack_require__(5);
 
 	var _Component3 = _interopRequireDefault(_Component2);
 
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var LoadMask = __webpack_require__(5);
-	var assign = __webpack_require__(4);
+	var LoadMask = __webpack_require__(6);
+	var assign = __webpack_require__(2);
 	var DragHelper = __webpack_require__(3);
-	var normalize = __webpack_require__(6);
-	var hasTouch = __webpack_require__(2);
+	var normalize = __webpack_require__(7);
+	var hasTouch = __webpack_require__(4);
 
 	var preventDefault = function preventDefault(event) {
 		return event && event.preventDefault();
@@ -121,11 +121,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Called on scroll by mouse wheel
 	 */
 	var syncScrollbar = function syncScrollbar(orientation) {
-
-		var refNames = {
-			vertical: 'verticalScrollbar',
-			horizontal: 'horizontalScrollbar'
-		};
 
 		return function (scrollPos, event) {
 
@@ -350,6 +345,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 					props.preventDefaultVertical && preventDefault(event);
 				}
+			}
+		}, {
+			key: 'componentWillReceiveProps',
+			value: function componentWillReceiveProps() {
+				setTimeout((function () {
+					React.findDOMNode(this) && this.fixHorizontalScrollbar();
+				}).bind(this), 0);
 			}
 		}, {
 			key: 'componentDidMount',
@@ -602,8 +604,33 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = 'ontouchstart' in global || (global.DocumentTouch && document instanceof DocumentTouch)
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+	'use strict';
+
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var keys;
+		var to = ToObject(target);
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = Object.keys(Object(from));
+
+			for (var i = 0; i < keys.length; i++) {
+				to[keys[i]] = from[keys[i]];
+			}
+		}
+
+		return to;
+	};
+
 
 /***/ },
 /* 3 */
@@ -611,9 +638,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var assign = __webpack_require__(4)
+	var assign = __webpack_require__(2)
 	var Region = __webpack_require__(14)
-	var hasTouch = __webpack_require__(2)
+	var hasTouch = __webpack_require__(4)
 	var once   = __webpack_require__(8)
 
 	var Helper = function(config){
@@ -810,162 +837,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	function ToObject(val) {
-		if (val == null) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var keys;
-		var to = ToObject(target);
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = arguments[s];
-			keys = Object.keys(Object(from));
-
-			for (var i = 0; i < keys.length; i++) {
-				to[keys[i]] = from[keys[i]];
-			}
-		}
-
-		return to;
-	};
-
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = 'ontouchstart' in global || (global.DocumentTouch && document instanceof DocumentTouch)
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict'
-
-	var React  = __webpack_require__(1)
-	var assign = __webpack_require__(4)
-	var Loader = __webpack_require__(9)
-
-	module.exports = React.createClass({
-
-	    displayName: 'LoadMask',
-
-	    getDefaultProps: function(){
-
-	        return {
-	            visible: false,
-	            visibleDisplayValue: 'block',
-	            defaultStyle: {
-	                background: 'rgba(128, 128, 128, 0.5)',
-	                position: 'absolute',
-	                width   : '100%',
-	                height  : '100%',
-	                display : 'none',
-	                top: 0,
-	                left: 0
-	            }
-	        }
-	    },
-
-	    render: function(){
-	        var props = assign({}, this.props)
-
-	        props.style = this.prepareStyle(props)
-
-	        props.className = props.className || ''
-	        props.className += ' loadmask'
-
-	        return React.createElement("div", React.__spread({},  props), 
-	            React.createElement(Loader, {size: props.size})
-	        )
-	    },
-
-	    prepareStyle: function(props){
-
-	        var style = assign({}, props.defaultStyle, props.style)
-
-	        style.display = props.visible?
-	                        props.visibleDisplayValue:
-	                        'none'
-
-	        return style
-	    }
-	})
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var hasOwn      = __webpack_require__(10)
-	var getPrefixed = __webpack_require__(11)
-
-	var map      = __webpack_require__(12)
-	var plugable = __webpack_require__(13)
-
-	function plugins(key, value){
-
-		var result = {
-			key  : key,
-			value: value
-		}
-
-		;(RESULT.plugins || []).forEach(function(fn){
-
-			var tmp = map(function(res){
-				return fn(key, value, res)
-			}, result)
-
-			if (tmp){
-				result = tmp
-			}
-		})
-
-		return result
-	}
-
-	function normalize(key, value){
-
-		var result = plugins(key, value)
-
-		return map(function(result){
-			return {
-				key  : getPrefixed(result.key, result.value),
-				value: result.value
-			}
-		}, result)
-
-		return result
-	}
-
-	var RESULT = function(style){
-
-		var k
-		var item
-		var result = {}
-
-		for (k in style) if (hasOwn(style, k)){
-			item = normalize(k, style[k])
-
-			if (!item){
-				continue
-			}
-
-			map(function(item){
-				result[item.key] = item.value
-			}, item)
-		}
-
-		return result
-	}
-
-	module.exports = plugable(RESULT)
-
-/***/ },
-/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1049,6 +925,132 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ReactClass;
 
 /***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict'
+
+	var React  = __webpack_require__(1)
+	var assign = __webpack_require__(2)
+	var Loader = __webpack_require__(9)
+
+	module.exports = React.createClass({
+
+	    displayName: 'LoadMask',
+
+	    getDefaultProps: function(){
+
+	        return {
+	            visible: false,
+	            visibleDisplayValue: 'block',
+	            defaultStyle: {
+	                background: 'rgba(128, 128, 128, 0.5)',
+	                position: 'absolute',
+	                width   : '100%',
+	                height  : '100%',
+	                display : 'none',
+	                top: 0,
+	                left: 0
+	            }
+	        }
+	    },
+
+	    render: function(){
+	        var props = assign({}, this.props)
+
+	        props.style = this.prepareStyle(props)
+
+	        props.className = props.className || ''
+	        props.className += ' loadmask'
+
+	        return React.createElement("div", React.__spread({},  props), 
+	            React.createElement(Loader, {size: props.size})
+	        )
+	    },
+
+	    prepareStyle: function(props){
+
+	        var style = assign({}, props.defaultStyle, props.style)
+
+	        style.display = props.visible?
+	                        props.visibleDisplayValue:
+	                        'none'
+
+	        return style
+	    }
+	})
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var hasOwn      = __webpack_require__(10)
+	var getPrefixed = __webpack_require__(11)
+
+	var map      = __webpack_require__(12)
+	var plugable = __webpack_require__(13)
+
+	function plugins(key, value){
+
+		var result = {
+			key  : key,
+			value: value
+		}
+
+		;(RESULT.plugins || []).forEach(function(fn){
+
+			var tmp = map(function(res){
+				return fn(key, value, res)
+			}, result)
+
+			if (tmp){
+				result = tmp
+			}
+		})
+
+		return result
+	}
+
+	function normalize(key, value){
+
+		var result = plugins(key, value)
+
+		return map(function(result){
+			return {
+				key  : getPrefixed(result.key, result.value),
+				value: result.value
+			}
+		}, result)
+
+		return result
+	}
+
+	var RESULT = function(style){
+
+		var k
+		var item
+		var result = {}
+
+		for (k in style) if (hasOwn(style, k)){
+			item = normalize(k, style[k])
+
+			if (!item){
+				continue
+			}
+
+			map(function(item){
+				result[item.key] = item.value
+			}, item)
+		}
+
+		return result
+	}
+
+	module.exports = plugable(RESULT)
+
+/***/ },
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1077,7 +1079,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var React  = __webpack_require__(1)
-	var assign = __webpack_require__(4)
+	var assign = __webpack_require__(2)
 
 	module.exports = React.createClass({
 
@@ -1228,7 +1230,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(26)
+	var Region = __webpack_require__(22)
 
 	__webpack_require__(19)
 	__webpack_require__(20)
@@ -1459,9 +1461,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(22)
-	var getPrefix    = __webpack_require__(23)
-	var el           = __webpack_require__(24)
+	var toUpperFirst = __webpack_require__(23)
+	var getPrefix    = __webpack_require__(24)
+	var el           = __webpack_require__(25)
 
 	var MEMORY = {}
 	var STYLE
@@ -1556,9 +1558,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var getPrefix     = __webpack_require__(23)
-	var forcePrefixed = __webpack_require__(25)
-	var el            = __webpack_require__(24)
+	var getPrefix     = __webpack_require__(24)
+	var forcePrefixed = __webpack_require__(26)
+	var el            = __webpack_require__(25)
 
 	var MEMORY = {}
 	var STYLE
@@ -1610,7 +1612,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var Region = __webpack_require__(26)
+	var Region = __webpack_require__(22)
 
 	/**
 	 * @static
@@ -1731,7 +1733,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var Region = __webpack_require__(26)
+	var Region = __webpack_require__(22)
 
 	/**
 	 *
@@ -1775,7 +1777,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var ALIGN_TO_NORMALIZED = __webpack_require__(27)
 
-	var Region = __webpack_require__(26)
+	var Region = __webpack_require__(22)
 
 	/**
 	 * @localdoc Given source and target regions, and the given alignments required, returns a region that is the resulting allignment.
@@ -1852,6 +1854,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = __webpack_require__(28)
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	module.exports = function(str){
@@ -1861,15 +1869,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(22)
+	var toUpperFirst = __webpack_require__(23)
 	var prefixes     = ["ms", "Moz", "Webkit", "O"]
 
-	var el = __webpack_require__(24)
+	var el = __webpack_require__(25)
 
 	var ELEMENT
 	var PREFIX
@@ -1900,7 +1908,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -1922,13 +1930,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toUpperFirst = __webpack_require__(22)
-	var getPrefix    = __webpack_require__(23)
+	var toUpperFirst = __webpack_require__(23)
+	var getPrefix    = __webpack_require__(24)
 	var properties   = __webpack_require__(17)
 
 	/**
@@ -1951,18 +1959,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(28)
-
-/***/ },
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
-	var Region = __webpack_require__(26)
+	var Region = __webpack_require__(22)
 
 	/**
 	 *
@@ -2147,7 +2149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var hasOwn    = __webpack_require__(33)
 	var newify    = __webpack_require__(34)
 
-	var assign      = __webpack_require__(4);
+	var assign      = __webpack_require__(2);
 	var EventEmitter = __webpack_require__(32).EventEmitter
 
 	var inherits = __webpack_require__(29)
