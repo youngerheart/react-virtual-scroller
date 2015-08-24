@@ -219,7 +219,7 @@ class Scroller extends Component {
 
 	handleWheel(event){
 
-		var props = this.props
+		var props      = this.props
 		// var normalizedEvent = normalizeWheel(event)
 
 		var virtual    = props.virtualRendering
@@ -235,7 +235,7 @@ class Scroller extends Component {
 
 		if (horizontal){
 			// delta = delta || normalizedEvent.pixelX
-			delta = delta || event.deltaX
+			delta = event.deltaX
 
 			minScrollStep = props.minHorizontalScrollStep || minScrollStep
 		} else {
